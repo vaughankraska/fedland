@@ -132,7 +132,7 @@ dmypy.json
 .pyre/
 
 # From pytorch example
-# data
+data
 *.npz
 *.tgz
 *.tar.gz
