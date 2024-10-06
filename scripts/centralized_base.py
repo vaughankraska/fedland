@@ -4,7 +4,11 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as fun
+import torch.optim as optim
 import torchvision
+
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # Matches fedn's pytorch example
@@ -30,24 +34,99 @@ def load_data(batch_size=128, shuffle=True):
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
 
+    # transform = torchvision.transforms.Compose([
+    #     torchvision.transforms.ToTensor(),
+    #     torchvision.transforms.Normalize((0.1307,), (0.3081,))
+    #     ])
+
     train_set = torchvision.datasets.MNIST(
             root=f"{out_dir}/train",
-            transform=torchvision.transforms.ToTensor,
+            transform=torchvision.transforms.ToTensor(),
             train=True,
-            download=True
+            download=True,
             )
     test_set = torchvision.datasets.MNIST(
             root=f"{out_dir}/test",
-            transform=torchvision.transforms.ToTensor,
+            transform=torchvision.transforms.ToTensor(),
             train=False,
-            download=True
+            download=True,
             )
 
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=shuffle)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=shuffle)
+    train_loader = torch.utils.data.DataLoader(
+            train_set, batch_size=batch_size, shuffle=shuffle
+            )
+    test_loader = torch.utils.data.DataLoader(
+            test_set, batch_size=batch_size, shuffle=shuffle
+            )
 
     return train_loader, test_loader
 
 
-def path_norm(model, in_size):
-    todo!()
+def train(
+        model: nn.Module,
+        train_loader,
+        criterion,
+        optimizer: optim.Optimizer,
+        epochs=5
+        ):
+    model.train()
+    for epoch in range(epochs):
+        running_loss = 0.0
+        for i, data in enumerate(train_loader, 0):
+            inputs = data[0].to(DEVICE)
+            labels = data[1].to(DEVICE)
+
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item()
+            if i % 200 == 199:
+                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 200:.3f}')
+                running_loss = 0.0
+
+
+def path_norm(model: nn.Module, in_size: int):
+    modified_model = copy.deepcopy(model)
+    modified_model.to(torch.device("cpu"))
+    with torch.no_grad():
+        for param in modified_model.parameters():
+            param.data = param.data ** 2
+    ones = torch.ones_like(in_size)
+
+    return (torch.sum(modified_model.forward(ones)).data) ** 0.5
+
+
+if __name__ == "__main__":
+
+    print(f"=>Starting Centralized Run on {DEVICE}")
+    # Note! Mismatch?
+    # From Horvaths code:
+    # BATCH_SIZE = 128 ...
+    # optimizer_name = 'SGD'
+    # optimizer_params = {'lr' : 0.02, 'momentum' : 0.9, 'weight_decay': 0}
+    # grad_clip = 0.01
+    # But paper says: "For ResNet with CIFAR10 to obtain good minima β = 0.5, b = 0.1 were used for 10 epochs."
+
+    batch_size = 64
+    epochs = 10
+    learning_rate = 0.1
+    momentum = 0.5
+
+    train_loader, test_loader = load_data(batch_size)
+    model = Net().to(DEVICE)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(
+            model.parameters(),
+            lr=learning_rate,
+            momentum=momentum
+            )
+
+    train(model, train_loader, criterion, optimizer, epochs)
+    print("<== Training Finished")
+    # in_size = (batch_size, 784)
+    input, out = next(iter(train_loader))
+    p_norm = path_norm(model, input[0].unsqueeze(0))
+    print(f"\nPath Norm: {p_norm}")
