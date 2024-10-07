@@ -26,7 +26,7 @@ def compile_model():
             x = torch.nn.functional.relu(self.fc1(x.reshape(x.size(0), 784)))
             x = torch.nn.functional.dropout(x, p=0.5, training=self.training)
             x = torch.nn.functional.relu(self.fc2(x))
-            x = torch.nn.functional.log_softmax(self.fc3(x), dim=1)
+            # x = torch.nn.functional.log_softmax(self.fc3(x), dim=1)
             return x
 
     return Net()

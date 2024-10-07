@@ -4,6 +4,7 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as fun
+from torch.utils.data import DataLoader
 import torch.optim as optim
 import torchvision
 
@@ -19,16 +20,17 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(64, 32)
         self.fc3 = nn.Linear(32, 10)
 
-    def forward(self, x):
+    def forward(self, x) -> torch.Tensor:
         x = fun.relu(self.fc1(x.reshape(x.size(0), 784)))
         x = fun.dropout(x, p=0.5, training=self.training)
         x = fun.relu(self.fc2(x))
-        x = fun.log_softmax(self.fc3(x), dim=1)
+        x = fun.relu(self.fc3(x))
+        # x = fun.log_softmax(self.fc3(x), dim=1)
 
         return x
 
 
-def load_data(batch_size=128, shuffle=True):
+def load_data(batch_size=128, shuffle=True) -> tuple[DataLoader, DataLoader]:
     # Make dir if necessary
     out_dir = "./data/centralized"
     if not os.path.exists(out_dir):
@@ -52,10 +54,10 @@ def load_data(batch_size=128, shuffle=True):
             download=True,
             )
 
-    train_loader = torch.utils.data.DataLoader(
+    train_loader = DataLoader(
             train_set, batch_size=batch_size, shuffle=shuffle
             )
-    test_loader = torch.utils.data.DataLoader(
+    test_loader = DataLoader(
             test_set, batch_size=batch_size, shuffle=shuffle
             )
 
@@ -88,15 +90,24 @@ def train(
                 running_loss = 0.0
 
 
-def path_norm(model: nn.Module, in_size: int):
+def path_norm(model: nn.Module, in_size: torch.Tensor):
+    print(f"in_size={in_size}")
     modified_model = copy.deepcopy(model)
     modified_model.to(torch.device("cpu"))
+
     with torch.no_grad():
         for param in modified_model.parameters():
             param.data = param.data ** 2
-    ones = torch.ones_like(in_size)
+            print(f"param data: {param.data}")
 
-    return (torch.sum(modified_model.forward(ones)).data) ** 0.5
+    ones = torch.ones_like(in_size)
+    print(f"model: {modified_model}")
+
+    t = modified_model.forward(ones)
+    print(f"forwarded: {t}")
+    temp = (torch.sum(t).data)
+    print(f"temp: {temp}")
+    return temp ** 0.5
 
 
 if __name__ == "__main__":
@@ -111,12 +122,12 @@ if __name__ == "__main__":
     # But paper says: "For ResNet with CIFAR10 to obtain good minima β = 0.5, b = 0.1 were used for 10 epochs."
 
     batch_size = 64
-    epochs = 10
+    epochs = 5 # 10!
     learning_rate = 0.1
     momentum = 0.5
 
     train_loader, test_loader = load_data(batch_size)
-    model = Net().to(DEVICE)
+    model: nn.Module = Net().to(DEVICE)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
             model.parameters(),
