@@ -6,7 +6,7 @@ import torch.nn.functional as fun
 class FedNet(nn.Module):
     """
     A fully connected NN to match FEDn's pytorch example.
-    This model follows a structure similar to the PyTorch example provided by FEDn.
+    Note the output is not softmaxed.
     """
 
     def __init__(self):

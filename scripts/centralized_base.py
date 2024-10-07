@@ -1,28 +1,40 @@
-# based on Horvath Csongor's MSC code, adapted for MNIST and a more simple NN
 import torch
+import json
+from datetime import datetime
 import torch.nn as nn
 import torch.optim as optim
+from typing import Dict, List
+from torch.utils.data import DataLoader
 from fed_land.loaders import load_mnist_data
 from fed_land.networks import FedNet
-from fed_land.metrics import path_norm
-
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from fed_land.metrics import evaluate, path_norm
 
 
 def train(
         model: nn.Module,
-        train_loader,
-        criterion,
+        train_loader: DataLoader,
+        test_loader: DataLoader,
+        criterion: nn.Module,
         optimizer: optim.Optimizer,
-        epochs=5
-        ):
-    model.train()
+        device: torch.device,
+        epochs: int = 5
+        ) -> Dict[str, List[float]]:
+
+    model.to(device)
+    results = {
+        'train_loss': [],
+        'train_accuracy': [],
+        'test_loss': [],
+        'test_accuracy': [],
+        'path_norm': []
+    }
+
     for epoch in range(epochs):
-        running_loss = 0.0
-        for i, data in enumerate(train_loader, 0):
-            inputs = data[0].to(DEVICE)
-            labels = data[1].to(DEVICE)
+        model.train()
+        running_loss, correct, total = 0.0, 0, 0
+        for i, data in enumerate(train_loader):
+            inputs = data[0].to(device)
+            labels = data[1].to(device)
 
             optimizer.zero_grad()
             outputs = model(inputs)
@@ -31,14 +43,51 @@ def train(
             optimizer.step()
 
             running_loss += loss.item()
+            _, predicted = outputs.max(1)
+            total += labels.size(0)
+            correct += predicted.eq(labels).sum().item()
+
             if i % 200 == 199:
-                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 200:.3f}')
-                running_loss = 0.0
+                print(f'Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}], '  # noqa E501
+                      f'Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%')  # noqa E501
+                running_loss, correct, total = 0.0, 0, 0
+
+        # Train eval
+        train_loss, train_acc = evaluate(model, train_loader, criterion, device)  # noqa E501
+        results['train_loss'].append(float(train_loss))
+        results['train_accuracy'].append(float(train_acc))
+
+        # Test eval
+        test_loss, test_acc = evaluate(model, test_loader, criterion, device)
+        results['test_loss'].append(float(test_loss))
+        results['test_accuracy'].append(float(test_acc))
+
+        # And path norm
+        pn = path_norm(model, train_loader)
+        results['path_norm'].append(float(pn))
+
+        print(f'Epoch [{epoch+1}/{epochs}]:')
+        print(f'Train Loss: {train_loss:.3f}, Train Accuracy: {train_acc:.2f}%')  # noqa E501
+        print(f'Test Loss: {test_loss:.3f}, Test Accuracy: {test_acc:.2f}%')
+        print(f'Path Norm: {pn:.2f}')
+        print('=' * 50)
+
+    return results
+
+
+def dump(data: dict, base_filename: str):
+    date_str = datetime.now().strftime("%Y%m%d")
+    filename = f"results/{date_str}_{base_filename}.json"
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=4)
+
+    print(f"Data saved to {filename}")
 
 
 if __name__ == "__main__":
 
-    print(f"=>Starting Centralized Run on {DEVICE}")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"=>Starting Centralized Run on {device}")
     # Note! Mismatch?
     # From Horvaths code:
     # BATCH_SIZE = 128 ...
@@ -55,7 +104,7 @@ if __name__ == "__main__":
     train_loader, test_loader = load_mnist_data(batch_size)
     # Counterintuitive that we are running FedNet in centralized setting
     # but welp, I like the name.
-    model: nn.Module = FedNet().to(DEVICE)
+    model: nn.Module = FedNet()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
             model.parameters(),
@@ -63,9 +112,14 @@ if __name__ == "__main__":
             momentum=momentum
             )
 
-    train(model, train_loader, criterion, optimizer, epochs)
+    results = train(
+            model,
+            train_loader,
+            test_loader,
+            criterion,
+            optimizer,
+            device,
+            epochs
+            )
+    dump(results, "central_path_norm")
     print("<== Training Finished")
-    # in_size = (batch_size, 784)
-    input, out = next(iter(train_loader))
-    p_norm = path_norm(model, input[0].unsqueeze(0))
-    print(f"\nPath Norm: {p_norm}")
