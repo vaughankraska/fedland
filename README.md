@@ -14,6 +14,8 @@ Loss landscapes in the federated learning [1] setting are relatively more comple
 Since we are using FEDn, we use their recommended project structure.
 
 I have added pyproject.toml for managing our dependencies. I have written it to use [Poetry](https://python-poetry.org/). You probably want to use an virtual environment or tool to manage your virtualenv. To install the dependencies using poetry, simply run `poetry install`. I set it to use python 3.11
+
+I have also added a directory /core to add shared pieces of logic to import for our tests (assuming FEDn allows me to import and package my own modules).
 ```txt
 project
 ├ client
@@ -25,6 +27,9 @@ project
 │ └ validate.py
 ├ data
 │ └ mnist.npz
+├ fed_land
+│ └ __init__.py
+├ core
 ├ README.md
 ├ pyproject.toml
 ├ scripts / notebooks
