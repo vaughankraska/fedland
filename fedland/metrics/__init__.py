@@ -2,8 +2,8 @@
 # MSC code, adapted for MNIST and a FEDn
 from typing import Tuple
 import copy
-from fed_land.metrics.frobenius import frobenius_norm
-from fed_land.metrics.pac_bayes import pac_bayes_bound
+from fedland.metrics.frobenius import frobenius_norm
+from fedland.metrics.pac_bayes import pac_bayes_bound
 import torch
 from torch.nn import Module
 from torch.utils.data import DataLoader

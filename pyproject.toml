@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "fed_land"
+name = "fedland"
 version = "0.1.0"
-description = "Project D research in Loss Landscapes"
+description = "Research Libary for Federated Learing Loss Landscapes"
 authors = ["Finn Vaughankraska"]
 license = "None"
 readme = "README.md"

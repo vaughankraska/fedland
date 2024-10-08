@@ -3,7 +3,7 @@ import collections
 import torch
 
 from fedn.utils.helpers.helpers import get_helper
-from fed_land.networks import FedNet
+from fedland.networks import FedNet
 
 HELPER_MODULE = "numpyhelper"
 helper = get_helper(HELPER_MODULE)

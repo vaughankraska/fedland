@@ -1,7 +1,7 @@
 import os
 from typing import Tuple
 from math import floor
-from fed_land.loaders import load_mnist_data
+from fedland.loaders import load_mnist_data
 import torch
 from torch.utils.data import Subset
 from torch.utils.data import DataLoader

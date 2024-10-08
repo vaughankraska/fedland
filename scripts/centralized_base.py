@@ -5,11 +5,13 @@ import torch.nn as nn
 import torch.optim as optim
 from typing import Dict, List
 from torch.utils.data import DataLoader
-from fed_land.loaders import load_mnist_data
-from fed_land.networks import FedNet
-from fed_land.metrics import evaluate, path_norm
+from fedland.loaders import load_mnist_data
+from fedland.networks import FedNet
+from fedland.metrics import evaluate, path_norm
 
 
+# TODO: Refactor training into fedland lib so I can share
+# the training logic between centralized and federated settings
 def train(
         model: nn.Module,
         train_loader: DataLoader,

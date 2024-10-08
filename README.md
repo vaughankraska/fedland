@@ -26,7 +26,7 @@ project
 │ └ validate.py
 ├ data
 │ └ mnist.npz
-├ fed_land
+├ fedland
 │ └ __init__.py
 ├ README.md
 ├ pyproject.toml
