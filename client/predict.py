@@ -20,17 +20,23 @@ def predict(in_model_path, out_artifact_path, data_path=None):
     :type data_path: str
     """
     # Load data
-    x_test, y_test = load_data(data_path, is_train=False)
+    _, test_loader = load_data(data_path)
+    # x_test, y_test = load_data(data_path, is_train=False)
 
     # Load model
     model = load_parameters(in_model_path)
     model.eval()
 
+    predictions = []
     # Predict
     with torch.no_grad():
-        y_pred = model(x_test)
-    # Save prediction to file/artifact, the artifact will be uploaded to the object store by the client
-    torch.save(y_pred, out_artifact_path)
+        for inputs, labels in test_loader:
+            output_raw = model(inputs)
+            predictions.extend(output_raw)
+
+    # Save prediction to file/artifact, the artifact will be
+    # uploaded to the object store by the client
+    torch.save(predictions, out_artifact_path)
 
 
 if __name__ == "__main__":

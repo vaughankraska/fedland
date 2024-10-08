@@ -1,97 +1,81 @@
 import os
+from typing import Tuple
 from math import floor
-
+from fed_land.loaders import load_mnist_data
 import torch
-import torchvision
+from torch.utils.data import Subset
+from torch.utils.data import DataLoader
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 abs_path = os.path.abspath(dir_path)
 
 
-def get_data(out_dir="data"):
-    # Make dir if necessary
-    if not os.path.exists(out_dir):
-        os.mkdir(out_dir)
-
-    # Only download if not already downloaded
-    if not os.path.exists(f"{out_dir}/train"):
-        torchvision.datasets.MNIST(root=f"{out_dir}/train", transform=torchvision.transforms.ToTensor, train=True, download=True)
-    if not os.path.exists(f"{out_dir}/test"):
-        torchvision.datasets.MNIST(root=f"{out_dir}/test", transform=torchvision.transforms.ToTensor, train=False, download=True)
-
-
-def load_data(data_path, is_train=True):
+def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]:
     """Load data from disk.
 
-    :param data_path: Path to data file.
+    :param data_path: Path to data dir. ex) 'data/clients/1'
     :type data_path: str
-    :param is_train: Whether to load training or test data.
-    :type is_train: bool
-    :return: Tuple of data and labels.
-    :rtype: tuple
+    :param batch_size: Batch Size for DataLoader
+    :type batch_size: int
+    :return: Tuple of Test and Training Loaders
+    :rtype: Tuple[DataLoader, DataLoader]
     """
-    if data_path is None:
-        data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/clients/1/mnist.pt")
+    if client_data_path is None:
+        client_data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/clients/1")
 
-    data = torch.load(data_path, weights_only=True)
+    train_subset = torch.load(client_data_path + "train/mnist.data", weights_only=True)
+    test_subset = torch.load(client_data_path + "test/mnist.data", weights_only=True)
 
-    if is_train:
-        X = data["x_train"]
-        y = data["y_train"]
-    else:
-        X = data["x_test"]
-        y = data["y_test"]
+    train_loader = DataLoader(
+            train_subset,
+            batch_size=batch_size,
+            shuffle=False
+            )
+    test_loader = DataLoader(
+            test_subset,
+            batch_size=batch_size,
+            shuffle=False
+            )
 
-    # Normalize
-    X = X / 255
-
-    return X, y
-
-
-def splitset(dataset, parts):
-    n = dataset.shape[0]
-    local_n = floor(n / parts)
-    result = []
-    for i in range(parts):
-        result.append(dataset[i * local_n : (i + 1) * local_n])
-    return result
+    return train_loader, test_loader
 
 
 def split(out_dir="data"):
-    n_splits = int(os.environ.get("FEDN_NUM_DATA_SPLITS", 2))
+    n_splits = int(os.environ.get("FEDN_NUM_DATA_SPLITS", 5))
 
     # Make dir
     if not os.path.exists(f"{out_dir}/clients"):
         os.mkdir(f"{out_dir}/clients")
 
     # Load and convert to dict
-    train_data = torchvision.datasets.MNIST(root=f"{out_dir}/train", transform=torchvision.transforms.ToTensor, train=True)
-    test_data = torchvision.datasets.MNIST(root=f"{out_dir}/test", transform=torchvision.transforms.ToTensor, train=False)
-    data = {
-        "x_train": splitset(train_data.data, n_splits),
-        "y_train": splitset(train_data.targets, n_splits),
-        "x_test": splitset(test_data.data, n_splits),
-        "y_test": splitset(test_data.targets, n_splits),
-    }
+    train_loader, test_loader = load_mnist_data(
+            shuffle_train=True, shuffle_test=False
+            )
+
+    train_split_size = floor(len(train_loader.dataset) / n_splits)
+    test_split_size = floor(len(test_loader.dataset) / n_splits)
 
     # Make splits
     for i in range(n_splits):
         subdir = f"{out_dir}/clients/{str(i+1)}"
         if not os.path.exists(subdir):
             os.mkdir(subdir)
-        torch.save(
-            {
-                "x_train": data["x_train"][i],
-                "y_train": data["y_train"][i],
-                "x_test": data["x_test"][i],
-                "y_test": data["y_test"][i],
-            },
-            f"{subdir}/mnist.pt",
-        )
+
+        train_subset = Subset(
+                train_loader.dataset,
+                range(i * train_split_size, (i + 1) * train_split_size)
+                )
+        test_subset = Subset(
+                test_loader.dataset,
+                range(i * test_split_size, (i + 1) * test_split_size)
+                )
+
+        torch.save(train_subset, f"{subdir}/train/mnist.pt")
+        torch.save(test_subset, f"{subdir}/test/mnist.pt")
 
 
 if __name__ == "__main__":
     # Prepare data if not already done
     if not os.path.exists(abs_path + "/data/clients/1"):
-        get_data()
+        load_mnist_data()
         split()

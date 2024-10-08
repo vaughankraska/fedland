@@ -2,10 +2,11 @@ import os
 import sys
 
 import torch
+from fedn.utils.helpers.helpers import save_metrics
 from model import load_parameters
 
 from data import load_data
-from fedn.utils.helpers.helpers import save_metrics
+from fed_land.metrics import evaluate, path_norm
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.abspath(dir_path))
@@ -22,29 +23,24 @@ def validate(in_model_path, out_json_path, data_path=None):
     :type data_path: str
     """
     # Load data
-    x_train, y_train = load_data(data_path)
-    x_test, y_test = load_data(data_path, is_train=False)
+    train_loader, test_loader = load_data(data_path)
 
     # Load model
     model = load_parameters(in_model_path)
     model.eval()
+    criterion = torch.nn.CrossEntropyLoss()
+    device = torch.device("cpu")
 
-    # Evaluate
-    criterion = torch.nn.NLLLoss()
-    with torch.no_grad():
-        train_out = model(x_train)
-        training_loss = criterion(train_out, y_train)
-        training_accuracy = torch.sum(torch.argmax(train_out, dim=1) == y_train) / len(train_out)
-        test_out = model(x_test)
-        test_loss = criterion(test_out, y_test)
-        test_accuracy = torch.sum(torch.argmax(test_out, dim=1) == y_test) / len(test_out)
-
+    train_loss, train_acc = evaluate(model, train_loader, criterion, device)  # noqa E501
+    test_loss, test_acc = evaluate(model, test_loader, criterion, device)
+    pnorm = path_norm(model, train_loader)
     # JSON schema
     report = {
-        "training_loss": training_loss.item(),
-        "training_accuracy": training_accuracy.item(),
-        "test_loss": test_loss.item(),
-        "test_accuracy": test_accuracy.item(),
+        "training_loss": float(train_loss),
+        "training_accuracy": float(train_acc),
+        "test_loss": float(test_loss),
+        "test_accuracy": float(test_acc),
+        "path_norm": float(pnorm)
     }
 
     # Save JSON

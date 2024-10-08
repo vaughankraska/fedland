@@ -3,6 +3,7 @@ import collections
 import torch
 
 from fedn.utils.helpers.helpers import get_helper
+from fed_land.networks import FedNet
 
 HELPER_MODULE = "numpyhelper"
 helper = get_helper(HELPER_MODULE)
@@ -15,21 +16,7 @@ def compile_model():
     :rtype: torch.nn.Module
     """
 
-    class Net(torch.nn.Module):
-        def __init__(self):
-            super(Net, self).__init__()
-            self.fc1 = torch.nn.Linear(784, 64)
-            self.fc2 = torch.nn.Linear(64, 32)
-            self.fc3 = torch.nn.Linear(32, 10)
-
-        def forward(self, x):
-            x = torch.nn.functional.relu(self.fc1(x.reshape(x.size(0), 784)))
-            x = torch.nn.functional.dropout(x, p=0.5, training=self.training)
-            x = torch.nn.functional.relu(self.fc2(x))
-            # x = torch.nn.functional.log_softmax(self.fc3(x), dim=1)
-            return x
-
-    return Net()
+    return FedNet()
 
 
 def save_parameters(model, out_path):
@@ -44,7 +31,7 @@ def save_parameters(model, out_path):
     helper.save(parameters_np, out_path)
 
 
-def load_parameters(model_path):
+def load_parameters(model_path) -> torch.nn.Module:
     """Load model parameters from file and populate model.
 
     param model_path: The path to load from.
