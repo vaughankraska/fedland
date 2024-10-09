@@ -3,8 +3,7 @@ from typing import Tuple
 from math import floor
 from fedland.loaders import load_mnist_data
 import torch
-from torch.utils.data import Subset
-from torch.utils.data import DataLoader
+from torch.utils.data import Subset, DataLoader
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 abs_path = os.path.abspath(dir_path)
@@ -21,10 +20,10 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
     :rtype: Tuple[DataLoader, DataLoader]
     """
     if client_data_path is None:
-        client_data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/clients/1")
+        client_data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/clients/1/")
 
-    train_subset = torch.load(client_data_path + "train/mnist.data", weights_only=True)
-    test_subset = torch.load(client_data_path + "test/mnist.data", weights_only=True)
+    train_subset = torch.load(client_data_path + "train/mnist.pt", weights_only=False)
+    test_subset = torch.load(client_data_path + "test/mnist.pt", weights_only=False)
 
     train_loader = DataLoader(
             train_subset,
@@ -60,6 +59,8 @@ def split(out_dir="data"):
         subdir = f"{out_dir}/clients/{str(i+1)}"
         if not os.path.exists(subdir):
             os.mkdir(subdir)
+            os.mkdir(subdir + "/train")
+            os.mkdir(subdir + "/test")
 
         train_subset = Subset(
                 train_loader.dataset,
@@ -70,12 +71,17 @@ def split(out_dir="data"):
                 range(i * test_split_size, (i + 1) * test_split_size)
                 )
 
+        print(f"Subsets saved to: {subdir}/...")
         torch.save(train_subset, f"{subdir}/train/mnist.pt")
         torch.save(test_subset, f"{subdir}/test/mnist.pt")
 
 
 if __name__ == "__main__":
     # Prepare data if not already done
+    print("===" * 20)
+    print(f"os path exists? {os.path.exists(abs_path + '/data/clients/1')}")
+    print(f"data path exists? {os.path.exists(abs_path + '/data')}")
+    print(f"abs_path: {abs_path}")
     if not os.path.exists(abs_path + "/data/clients/1"):
         load_mnist_data()
         split()

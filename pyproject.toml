@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fedland"
-version = "0.1.0"
+version = "0.1.1"
 description = "Research Libary for Federated Learing Loss Landscapes"
 authors = ["Finn Vaughankraska"]
 license = "None"
@@ -14,7 +14,7 @@ torch = "^2.4.1"
 torchvision = "^0.19.1"
 torchaudio = "^2.4.1"
 scipy = "^1.14.1"
-numpy = "^2.1.2"
+numpy = ">=2.1.2"
 python-dotenv = "^1.0.1"
 
 [build-system]

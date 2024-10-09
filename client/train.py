@@ -47,8 +47,9 @@ def train(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_loader, _ = load_data(data_path, batch_size=batch_size)
 
-    # # Load parmeters and initialize model
-    model = load_parameters(in_model_path)
+    # Load parmeters and initialize model
+    model = load_parameters(in_model_path).to(device)
+    print(model)
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
@@ -93,4 +94,5 @@ def train(
 
 
 if __name__ == "__main__":
+    print(f"[*] SYS ARGS: {sys.argv}")
     train(sys.argv[1], sys.argv[2])

@@ -21,7 +21,6 @@ def predict(in_model_path, out_artifact_path, data_path=None):
     """
     # Load data
     _, test_loader = load_data(data_path)
-    # x_test, y_test = load_data(data_path, is_train=False)
 
     # Load model
     model = load_parameters(in_model_path)
