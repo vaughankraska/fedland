@@ -103,7 +103,8 @@ celerybeat-schedule
 
 # Environments
 .env
-!.env-example
+.env.**
+!.env.example
 .venv
 .mnist-pytorch
 .mnist-keras

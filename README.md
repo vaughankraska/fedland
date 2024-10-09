@@ -11,7 +11,7 @@ Loss landscapes in the federated learning [1] setting are relatively more comple
 
 ## Project Layout:
 
-Since we are using FEDn, we use their recommended project structure.
+Since I am using FEDn, the project follows their recommended project structure.
 
 I have added pyproject.toml for managing our dependencies. I have written it to use [Poetry](https://python-poetry.org/). You probably want to use an virtual environment or tool to manage your virtualenv. To install the dependencies using poetry, simply run `poetry install`. I set it to use python 3.11
 
@@ -33,3 +33,11 @@ project
 ├ scripts / notebooks
 └ Dockerfile
 ```
+
+## Running the project
+1. Setup a venv
+2. Run `poetry install` in venv
+3. Create and fill in the .env fields based on .env.example
+    - run: `cp .env.example .env`
+4. Run whatever scripts you want in /scripts
+    - eg: `python scripts/centralized_base.py`
