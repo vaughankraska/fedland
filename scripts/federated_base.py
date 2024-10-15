@@ -2,6 +2,7 @@ import os
 import copy
 import tarfile
 import time
+import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
 from fedn import APIClient
@@ -68,19 +69,20 @@ if __name__ == "__main__":
             verify=True
             )
     print("=>Starting Federated Run")
-    print(f"[*] Clients: {api.get_clients_count()}")
-    setup(api)
+    # print(f"[*] Clients: {api.get_clients_count()}")
+    # setup(api)
 
-    clients = []
-    for i in range(FEDN_NUM_DATA_SPLITS):
-        config = copy.deepcopy(client_config)
-        config["client_id"] = f"client-{i}-{date_str}"
-        config["name"] = f"client-{i}"
-        # config["combiner"] = combiner
-        client = Client(config)
-        clients.append(client)
+    # downloads_path = os.path.expanduser("~/Downloads") # Read from downloads clientx.yaml?
+    # clients = []
+    # for i in range(FEDN_NUM_DATA_SPLITS):
+    #     config = copy.deepcopy(client_config)
+    #     config["client_id"] = f"client-{i}-{date_str}"
+    #     config["name"] = f"client-{i}"
+    #     # config["combiner"] = combiner
+    #     client = Client(config)
+    #     clients.append(client)
 
-    print(date_str)
-    print(f"clients: {clients}")
-    time.sleep(120)
-    # api.start_session(f"sesh")
+    # print(date_str)
+    # print(f"clients: {clients}")
+    # time.sleep(120)
+    api.start_session(f"sesh-{date_str}")
