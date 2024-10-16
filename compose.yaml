@@ -1,31 +1,118 @@
-# TODO! meld for our tests if I want to run everyting
-# ie server combiners and reducers locally.
-# Compose schema version
-version: '3.4'
-
-# Setup network
 networks:
   default:
     name: fedn_default
-
 services:
-  # Client from FEDn repo
-  client:
+  minio:
+    image: minio/minio:14128-5ee91dc
+    hostname: minio
     environment:
       - GET_HOSTS_FROM=dns
-      - FEDN_PACKAGE_EXTRACT_DIR=package
-    build:
-      context: .
-      args:
-        BASE_IMG: ${BASE_IMG:-python:3.10-slim}
+      - MINIO_HOST=minio
+      - MINIO_PORT=9000
+      - MINIO_ROOT_USER=fedn_admin
+      - MINIO_ROOT_PASSWORD=password
+    command: server /data --console-address minio:9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    ports:
+      - 9000:9000
+      - 9001:9001
+  mongo:
+    image: mongo:7.0
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=fedn_admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    ports:
+      - 6534:6534
+    command: mongod --port 6534
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    depends_on:
+      - "mongo"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=6534
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=fedn_admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_BASICAUTH_USERNAME=fedn_admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=password
+    ports:
+      - 8081:8081
+  api-server:
+    image: ghcr.io/scaleoutsystems/fedn/fedn:0.16.1
+    environment:
+      - GET_HOSTS_FROM=dns
+      - USER=test
+      - PROJECT=project
+      - FLASK_DEBUG=1
+      - STATESTORE_CONFIG=/app/config/settings-reducer.yaml
+      - MODELSTORAGE_CONFIG=/app/config/settings-reducer.yaml
+    working_dir: /app
+    volumes:
+      - ${HOST_REPO_DIR:-.}/fedn:/app/fedn
+    depends_on:
+      - minio
+      - mongo
+    entrypoint: [ "sh", "-c" ]
+    command:
+      - "/venv/bin/pip install --no-cache-dir -e . && /venv/bin/fedn controller start"
+    ports:
+      - 8092:8092
+  combiner:
+    image: ghcr.io/scaleoutsystems/fedn/fedn:0.16.1
+    environment:
+      - PYTHONUNBUFFERED=0
+      - GET_HOSTS_FROM=dns
+      - STATESTORE_CONFIG=/app/config/settings-combiner.yaml
+      - MODELSTORAGE_CONFIG=/app/config/settings-combiner.yaml
     working_dir: /app
     volumes:
       - ${HOST_REPO_DIR:-.}/fedn:/app/fedn
     entrypoint: [ "sh", "-c" ]
     command:
-      - "/venv/bin/pip install --no-cache-dir -e . && /venv/bin/fedn client start --init config/settings-client.yaml"
+      - "/venv/bin/pip install --no-cache-dir -e . && /venv/bin/fedn combiner start --init config/settings-combiner.yaml"
+    ports:
+      - 12080:12080
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:12080"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - api-server
+  client:
+    build:
+      context: .
+      args:
+        FEDN_NUM_DATA_SPLITS: ${FEDN_NUM_DATA_SPLITS:-5}
+    environment:
+      - GET_HOSTS_FROM=dns
+      - FEDN_PACKAGE_EXTRACT_DIR=package
+    volumes:
+      - ${HOST_REPO_DIR:-.}/fedn:/workspace/fedn
     deploy:
-      replicas: 0
+      replicas: 5 # !!! THIS SHOULD MATCH FEDN_NUM_DATA_SPLITS
     depends_on:
       combiner:
         condition: service_healthy
+    entrypoint: ["/workspace/client_entrypoint.sh"]
+#   surrealdb:
+#     image: surrealdb/surrealdb
+#     restart: always
+#     command: start file:/data/database.db
+#     environment:
+#       - SURREAL_USER=root
+#       - SURREAL_PASS=root
+#       - SURREAL_LOG=trace
+#     ports:
+#       - 8000:8000
+#     volumes:
+#       - surrealdb_data:/data
+# volumes:
+#   surrealdb_data:
+#     name: surrealdb_persistent_data
