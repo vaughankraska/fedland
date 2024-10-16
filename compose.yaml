@@ -1,6 +1,7 @@
 networks:
   default:
     name: fedn_default
+
 services:
   minio:
     image: minio/minio:14128-5ee91dc
@@ -20,6 +21,7 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
+
   mongo:
     image: mongo:7.0
     restart: always
@@ -29,6 +31,7 @@ services:
     ports:
       - 6534:6534
     command: mongod --port 6534
+
   mongo-express:
     image: mongo-express:latest
     restart: always
@@ -43,6 +46,7 @@ services:
       - ME_CONFIG_BASICAUTH_PASSWORD=password
     ports:
       - 8081:8081
+
   api-server:
     image: ghcr.io/scaleoutsystems/fedn/fedn:0.16.1
     environment:
@@ -53,16 +57,15 @@ services:
       - STATESTORE_CONFIG=/app/config/settings-reducer.yaml
       - MODELSTORAGE_CONFIG=/app/config/settings-reducer.yaml
     working_dir: /app
-    volumes:
-      - ${HOST_REPO_DIR:-.}/fedn:/app/fedn
+    entrypoint: [ "sh", "-c" ]
     depends_on:
       - minio
       - mongo
-    entrypoint: [ "sh", "-c" ]
     command:
       - "/venv/bin/pip install --no-cache-dir -e . && /venv/bin/fedn controller start"
     ports:
       - 8092:8092
+
   combiner:
     image: ghcr.io/scaleoutsystems/fedn/fedn:0.16.1
     environment:
@@ -71,8 +74,6 @@ services:
       - STATESTORE_CONFIG=/app/config/settings-combiner.yaml
       - MODELSTORAGE_CONFIG=/app/config/settings-combiner.yaml
     working_dir: /app
-    volumes:
-      - ${HOST_REPO_DIR:-.}/fedn:/app/fedn
     entrypoint: [ "sh", "-c" ]
     command:
       - "/venv/bin/pip install --no-cache-dir -e . && /venv/bin/fedn combiner start --init config/settings-combiner.yaml"
@@ -85,6 +86,7 @@ services:
       retries: 5
     depends_on:
       - api-server
+
   client:
     build:
       context: .
@@ -101,6 +103,7 @@ services:
       combiner:
         condition: service_healthy
     entrypoint: ["/workspace/client_entrypoint.sh"]
+    command: "fedn client start --init settings-client.yaml"
 #   surrealdb:
 #     image: surrealdb/surrealdb
 #     restart: always

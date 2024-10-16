@@ -8,6 +8,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONIOENCODING=utf-8 \
     FEDN_NUM_DATA_SPLITS=5
 
+RUN if [ ! -z "$GRPC_HEALTH_PROBE_VERSION" ]; then \
+        apt-get install -y wget && \
+        wget -qO /bin/grpc_health_probe \
+        https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+        chmod +x /bin/grpc_health_probe && \
+        apt-get remove -y wget && \
+        apt autoremove -y; \
+    else \
+        echo "No grpc_health_probe version specified, skipping installation"; \
+    fi
+
 WORKDIR /workspace
 
 ARG UID=10001
