@@ -36,7 +36,7 @@ RUN pip install --no-cache-dir fedn==0.16.1
 
 RUN fedn package create --path client && \
     fedn run build --path client --keep-venv
-
+RUN chown -R appuser:appuser /workspace
 USER appuser
 
-CMD ["fedn", "client", "start", "--init", "settings-client.yaml"]
+CMD ["fedn", "client", "start", "--init", "client-setting.yaml"]

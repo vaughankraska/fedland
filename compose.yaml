@@ -67,7 +67,9 @@ services:
       - 8092:8092
 
   combiner:
-    image: ghcr.io/scaleoutsystems/fedn/fedn:0.16.1
+    build:
+      context: .
+      dockerfile: Dockerfile.combiner
     environment:
       - PYTHONUNBUFFERED=0
       - GET_HOSTS_FROM=dns
@@ -103,7 +105,7 @@ services:
       combiner:
         condition: service_healthy
     entrypoint: ["/workspace/client_entrypoint.sh"]
-    command: "fedn client start --init settings-client.yaml"
+    command: "fedn client start --init client-settings.yaml"
 #   surrealdb:
 #     image: surrealdb/surrealdb
 #     restart: always
