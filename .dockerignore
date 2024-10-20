@@ -14,3 +14,6 @@ examples/*
 dist
 results
 scripts
+compose.yaml
+Dockerfile
+Dockerfile.*

@@ -1,2 +1,0 @@
-This directory will get populated with data when we run our code. This file is just so you know that and so that the directory exists and you see it in github/git.
--Finn

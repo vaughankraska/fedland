@@ -3,6 +3,7 @@ import sys
 import torch
 import torch.optim as optim
 from fedn.utils.helpers.helpers import save_metadata
+from fedland.metrics import path_norm
 from model import load_parameters, save_parameters
 from data import load_data
 
@@ -49,7 +50,7 @@ def train(
 
     # Load parmeters and initialize model
     model = load_parameters(in_model_path).to(device)
-    print(model)
+    print(f"[*] Model: {model}")
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
@@ -73,8 +74,10 @@ def train(
             correct += predicted.eq(labels).sum().item()
 
             if i % 200 == 199:
+                p_norm = path_norm(model, train_loader)
                 print(f'Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}], '  # noqa E501
-                      f'Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%')  # noqa E501
+                      f'Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%'  # noqa E501
+                      f'PNorm: {p_norm:.4f}')
                 running_loss, correct, total = 0.0, 0, 0
 
     # Metadata needed for aggregation server side

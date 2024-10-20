@@ -1,4 +1,4 @@
-python_env: python_env.yaml
+# python_env: python_env.yaml  # removed, managed in docker
 entry_points:
   build:
     command: python model.py

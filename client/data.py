@@ -1,18 +1,19 @@
 import os
 from typing import Tuple
-from math import floor
-from fedland.loaders import load_mnist_data
-import torch
-from torch.utils.data import Subset, DataLoader
+from fedn import APIClient
+from fedland.loaders import load_mnist_data, PartitionedDataLoader
+from torch.utils.data import DataLoader
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 abs_path = os.path.abspath(dir_path)
 
 
-def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]:
+def load_data(
+        client_data_path, batch_size=128
+        ) ->Tuple[DataLoader, DataLoader]:
     """Load data from disk.
 
-    :param data_path: Path to data dir. ex) 'data/clients/1'
+    :param data_path: Path to data dir. ex) 'data/path/to'
     :type data_path: str
     :param batch_size: Batch Size for DataLoader
     :type batch_size: int
@@ -20,18 +21,28 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
     :rtype: Tuple[DataLoader, DataLoader]
     """
     if client_data_path is None:
-        client_data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/clients/1/")
+        print("[*] Client Data path is None")
+        client_data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/")
 
-    train_subset = torch.load(client_data_path + "train/mnist.pt", weights_only=False)
-    test_subset = torch.load(client_data_path + "test/mnist.pt", weights_only=False)
+    training, testing = load_mnist_data()
+    # TODO: figure out the how to partition from centralized call
+    api_host = os.environ.get("FEDN_SERVER_HOST", "api-server")
+    api_port = os.environ.get("FEDN_SERVER_PORT", 8092)
+    api = APIClient(api_host, api_port)
+    clients = api.get_clients()
+    clients_count = clients.get("count", 0)
 
-    train_loader = DataLoader(
-            train_subset,
+    train_loader = PartitionedDataLoader(
+            training,
+            num_partitions=clients_count,
+            partition_index=HERE,
             batch_size=batch_size,
             shuffle=False
             )
-    test_loader = DataLoader(
-            test_subset,
+    test_loader = PartitionedDataLoader(
+            testing,
+            num_partitions=clients_count,
+            partition_index=HERE,
             batch_size=batch_size,
             shuffle=False
             )
@@ -39,49 +50,7 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
     return train_loader, test_loader
 
 
-def split(out_dir="data"):
-    n_splits = int(os.environ.get("FEDN_NUM_DATA_SPLITS", 5))
-
-    # Make dir
-    if not os.path.exists(f"{out_dir}/clients"):
-        os.mkdir(f"{out_dir}/clients")
-
-    # Load and convert to dict
-    train_loader, test_loader = load_mnist_data(
-            shuffle_train=True, shuffle_test=False
-            )
-
-    train_split_size = floor(len(train_loader.dataset) / n_splits)
-    test_split_size = floor(len(test_loader.dataset) / n_splits)
-
-    # Make splits
-    for i in range(n_splits):
-        subdir = f"{out_dir}/clients/{str(i+1)}"
-        if not os.path.exists(subdir):
-            os.mkdir(subdir)
-            os.mkdir(subdir + "/train")
-            os.mkdir(subdir + "/test")
-
-        train_subset = Subset(
-                train_loader.dataset,
-                range(i * train_split_size, (i + 1) * train_split_size)
-                )
-        test_subset = Subset(
-                test_loader.dataset,
-                range(i * test_split_size, (i + 1) * test_split_size)
-                )
-
-        print(f"Subsets saved to: {subdir}/...")
-        torch.save(train_subset, f"{subdir}/train/mnist.pt")
-        torch.save(test_subset, f"{subdir}/test/mnist.pt")
-
-
 if __name__ == "__main__":
     # Prepare data if not already done
-    print("===" * 20)
-    print(f"os path exists? {os.path.exists(abs_path + '/data/clients/1')}")
-    print(f"data path exists? {os.path.exists(abs_path + '/data')}")
-    print(f"abs_path: {abs_path}")
-    if not os.path.exists(abs_path + "/data/clients/1"):
+    if not os.path.exists(abs_path + "/data"):
         load_mnist_data()
-        split()
