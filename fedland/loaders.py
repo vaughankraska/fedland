@@ -23,6 +23,7 @@ class PartitionedDataLoader(DataLoader):
             ):
         self.dataset = dataset
         self.num_paritions = num_partitions
+        self.shuffle = shuffle
         self.drop_last = drop_last
 
         rng = np.random.default_rng(NUMPY_SEED)
