@@ -1,12 +1,14 @@
 # All based on/replicated from Horvath's Implementation
 # MSC code, adapted for MNIST and a FEDn
-from typing import Tuple
-import copy
+from typing import Tuple, Iterable, Any, Dict
 from fedland.metrics.frobenius import frobenius_norm
 from fedland.metrics.pac_bayes import pac_bayes_bound
+from fedland.metrics.path_norm import path_norm
 import torch
 from torch.nn import Module
 from torch.utils.data import DataLoader
+from collections import Counter
+import numpy as np
 
 
 def evaluate_all(
@@ -14,46 +16,59 @@ def evaluate_all(
         data_loader: DataLoader,
         criterion: Module,
         device: torch.device
-        ) -> Tuple[float, float, float, Tuple[float, float], float]:
+) -> Dict[str, Any]:
     """
     Evaluate all metrics:
         Avg Loss, Accuracy, Path Norm, Pac Bayes, Frobenius
-    returns:
-        Tuple[float, float, float, Tuple[float, float], float]
-    """
 
+    Args:
+        model (Module): The model to evaluate
+        data_loader (DataLoader): DataLoader for the dataset
+        criterion (Module): Loss function
+        device (torch.device): Device to run the evaluation on
+
+    Returns:
+        Dict[str, Any]: A dictionary containing all evaluation metrics
+    """
     avg_loss, accuracy = evaluate(
-            model,
-            data_loader,
-            criterion,
-            device
-            )
+        model,
+        data_loader,
+        criterion,
+        device
+    )
 
     in_size, _ = next(iter(data_loader))
+
     p_norm = path_norm(model, data_loader)
 
     bayes = pac_bayes_bound(
-            model=model,
-            data_loader=data_loader,
-            criterion=criterion,
-            device=device,
-            d=0.1,
-            sigma_max=0.5,
-            sigma_min=0.001,
-            M1=30,
-            M2=10,
-            M3=20
-            )
+        model=model,
+        data_loader=data_loader,
+        criterion=criterion,
+        device=device,
+        d=0.1,
+        sigma_max=0.5,
+        sigma_min=0.001,
+        M1=30,
+        M2=10,
+        M3=20
+    )
 
     frobenius = frobenius_norm(
-            model=model,
-            data_loader=data_loader,
-            criterion=criterion,
-            device=device,
-            num_max=10
-            )
+        model=model,
+        data_loader=data_loader,
+        criterion=criterion,
+        device=device,
+        num_max=10
+    )
 
-    return avg_loss, accuracy, p_norm, bayes, frobenius
+    return {
+        "avg_loss": avg_loss,
+        "accuracy": accuracy,
+        "path_norm": p_norm,
+        "pac_bayes": bayes,
+        "frobenius_norm": frobenius
+    }
 
 
 def evaluate(
@@ -87,23 +102,47 @@ def evaluate(
     return avg_loss, accuracy
 
 
-def path_norm(model: Module, data_loader: DataLoader) -> float:
+def calculate_class_balance(dataloader: DataLoader) -> Dict[str, Any]:
     """
-    Calculate the Path Norm for a NN via forward pass.
+    Calculate class balance for a dataset using a DataLoader.
+
+    This will run for the entire dataset/subset as defined by the loader.
+    No not use in training iterations since its wasteful and unnecessary.
+
+    Args:
+        dataloader (DataLoader): A PyTorch DataLoader object.
+    Returns:
+        dict: A dictionary containing
+            'class_counts',
+            'class_frequencies',
+            'gini_index',
     """
-    modified_model = copy.deepcopy(model)
-    modified_model.to(torch.device("cpu"))
-    in_size, _ = next(iter(data_loader))
-    in_tensor = in_size[0].unsqueeze(0)
+    if not isinstance(dataloader, DataLoader):
+        raise ValueError("Input must be a PyTorch DataLoader object")
 
-    with torch.no_grad():
-        for param in modified_model.parameters():
-            param.data = param.data ** 2
+    all_labels = []
+    for batch in dataloader:
+        _, labels = batch
+        all_labels.extend(labels.tolist())
 
-    ones = torch.ones_like(in_tensor)
-    summed = (torch.sum(modified_model.forward(ones)).data)
-    assert summed > 0, "Cannot square root a negative number in path"
+    class_counts = Counter(all_labels)
+    total_samples = len(all_labels)
+    class_frequencies = {cls: count / total_samples for cls, count in class_counts.items()}
 
-    return summed ** 0.5
+    # Calculate Gini index
+    gini_index = gini(class_counts.values())
+
+    return {
+        "class_counts": dict(class_counts),
+        "class_frequencies": class_frequencies,
+        "gini_index": gini_index,
+    }
 
 
+def gini(x: Iterable[float]):
+    x = np.asarray(list(x))
+    diffsum = 0
+    for i, xi in enumerate(x[:-1], 1):
+        diffsum += np.sum(np.abs(xi - x[i:]))
+
+    return diffsum / (len(x)**2 * np.mean(x))

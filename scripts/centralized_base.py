@@ -103,11 +103,7 @@ if __name__ == "__main__":
     learning_rate = 0.1
     momentum = 0.5
 
-    train_loader, test_loader = load_mnist_data(
-            batch_size,
-            shuffle_train=True,
-            shuffle_test=False
-            )
+    train_loader, test_loader = load_mnist_data()
     # Counterintuitive that we are running FedNet in centralized setting
     # but welp, I like the name.
     model: nn.Module = FedNet()
