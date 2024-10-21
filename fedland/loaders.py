@@ -2,7 +2,8 @@ import os
 import torch
 import torchvision
 import numpy as np
-from torch.utils.data import DataLoader, Dataset
+from typing import List
+from torch.utils.data import DataLoader, Dataset, Subset
 OUT_DIR = "./data"
 TORCH_SEED = 0
 NUMPY_SEED = 42
@@ -13,53 +14,38 @@ NUMPY_SEED = 42
 class PartitionedDataLoader(DataLoader):
     def __init__(
             self,
-            dataset,
-            num_partitions,
-            partition_index,
+            dataset: Dataset,
+            num_partitions: int,
+            partition_index: int,
             batch_size=128,
             shuffle=False,
-            drop_last=False,
+            target_balance_ratios: List[float] = None,
             *args, **kwargs
             ):
-        self.dataset = dataset
         self.num_paritions = num_partitions
         self.shuffle = shuffle
-        self.drop_last = drop_last
+        self.target_balance_ratios = target_balance_ratios
 
+        # Fix rng seed since we want reproducibility.
         rng = np.random.default_rng(NUMPY_SEED)
         indices = np.arange(len(dataset))
         rng.shuffle(indices)
 
+        # Subset the data
         partition_size = len(dataset) // num_partitions
         start_idx = partition_index * partition_size
         end_idx = start_idx + partition_size
         self.partition_indices = indices[start_idx:end_idx]
+        if shuffle:
+            indices = rng.permutation(self.partition_indices)
+        else:
+            indices = self.partition_indices
+        dataset = dataset.__getitems__([indices[idx] for idx in indices])
 
         super().__init__(dataset=dataset,
                          batch_size=batch_size,
                          shuffle=shuffle,
-                         drop_last=drop_last,
                          *args, **kwargs)
-
-    def __iter__(self):
-        if self.shuffle:
-            rng = np.random.default_rng(NUMPY_SEED)
-            indices = rng.permutation(self.partition_indices)
-        else:
-            indices = self.partition_indices
-
-        batches = [indices[i:i + self.batch_size] for i in range(0, len(indices), self.batch_size)]
-        if not self.drop_last and len(batches[-1]) < self.batch_size:
-            batches = batches[:-1]
-
-        for batch_indices in batches:
-            yield [self.dataset[i] for i in batch_indices]
-
-    def __len__(self):
-        if self.drop_last:
-            return len(self.partition_indices) // self.batch_size
-        else:
-            return (len(self.partition_indices) + self.batch_size - 1) // self.batch_size
 
 
 def load_mnist_data() -> tuple[Dataset, Dataset]:
