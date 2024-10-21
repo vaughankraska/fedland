@@ -6,27 +6,27 @@ import numpy as np
 
 
 def frobenius_norm(
-        model: Module,
-        data_loader: DataLoader,
-        criterion: Module,
-        device: torch.device,
-        num_max=10
-        ) -> float:
+    model: Module,
+    data_loader: DataLoader,
+    criterion: Module,
+    device: torch.device,
+    num_max=10,
+) -> float:
     """
     Calculate the Frobenius Norm of the Hessian estimated by
     the top num_max eigenvalues (instead of all).
     """
     w, _ = hessian_eigs(model, data_loader, criterion, device, num_max)
-    return sum([e ** 2 for e in w]) ** 0.5
+    return sum([e**2 for e in w]) ** 0.5
 
 
 def hessian_eigs(
-        model: Module,
-        data_loader: DataLoader,
-        criterion: Module,
-        device: torch.device,
-        num_max=10
-        ) -> tuple[list[float], list[list[float]]]:
+    model: Module,
+    data_loader: DataLoader,
+    criterion: Module,
+    device: torch.device,
+    num_max=10,
+) -> tuple[list[float], list[list[float]]]:
     """
     Calculate the Hessian Eigenvalues from model parameters
 
@@ -66,13 +66,14 @@ def _npvec_to_tensorlist(vec, params, device):
     for p in params:
         numel = p.data.numel()
         rval.append(
-                torch.from_numpy(
-                    vec[loc:loc+numel]
-                    ).view(p.data.shape).float().to(device)
-                )
+            torch.from_numpy(vec[loc : loc + numel])
+            .view(p.data.shape)
+            .float()
+            .to(device)
+        )
         loc += numel
 
-    assert loc == vec.size, 'Vector has more elements than net has parameters'
+    assert loc == vec.size, "Vector has more elements than net has parameters"
 
     return rval
 
@@ -90,14 +91,14 @@ def _gradtensor_to_npvec(net, include_bn=False):
     Returns:
         a concatenated numpy vector containing all gradients
     """
+
     # filter = lambda p: include_bn or len(p.data.size()) > 1
     def filter_function(p):
         return include_bn or len(p.data.size()) > 1
 
     return np.concatenate(
-            [p.grad.data.cpu().numpy().ravel()
-             for p in net.parameters() if filter(p)]
-            )
+        [p.grad.data.cpu().numpy().ravel() for p in net.parameters() if filter(p)]
+    )
 
 
 def _eval_hess_vec_prod(vec, params, net, criterion, data_loader, device):
@@ -120,7 +121,7 @@ def _eval_hess_vec_prod(vec, params, net, criterion, data_loader, device):
     3. Finally, perform one more backward pass.
     """
 
-    net.zero_grad() # clears grad for every parameter in the net
+    net.zero_grad()  # clears grad for every parameter in the net
     for x_batch, y_batch in data_loader:
         x_batch = x_batch.to(device)
         y_batch = y_batch.to(device)
@@ -128,9 +129,8 @@ def _eval_hess_vec_prod(vec, params, net, criterion, data_loader, device):
         loss = criterion(output, y_batch)
         grad_f = torch.autograd.grad(loss, inputs=params, create_graph=True)
 
-        grad_times_vec = 0.
+        grad_times_vec = 0.0
         for g, v in zip(grad_f, vec):
             grad_times_vec += (g * v).sum()
 
         grad_times_vec.backward()
-

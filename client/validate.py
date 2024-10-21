@@ -40,7 +40,7 @@ def validate(in_model_path, out_json_path, data_path=None):
         "training_accuracy": float(train_acc),
         "test_loss": float(test_loss),
         "test_accuracy": float(test_acc),
-        "path_norm": float(pnorm)
+        "path_norm": float(pnorm),
     }
 
     # Save JSON

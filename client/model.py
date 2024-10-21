@@ -43,7 +43,9 @@ def load_parameters(model_path) -> torch.nn.Module:
     parameters_np = helper.load(model_path)
 
     params_dict = zip(model.state_dict().keys(), parameters_np)
-    state_dict = collections.OrderedDict({key: torch.tensor(x) for key, x in params_dict})
+    state_dict = collections.OrderedDict(
+        {key: torch.tensor(x) for key, x in params_dict}
+    )
     model.load_state_dict(state_dict, strict=True)
     return model
 

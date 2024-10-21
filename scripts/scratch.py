@@ -8,30 +8,30 @@ def test():
     print(f"Train=\n{trainset}, Test=\n{testset}")
 
     train_loader = PartitionedDataLoader(
-            trainset,
-            num_partitions=1,
-            partition_index=0,
-            batch_size=1,
-            )
+        trainset,
+        num_partitions=1,
+        partition_index=0,
+        batch_size=1,
+    )
     t_loader_0 = PartitionedDataLoader(
-            trainset,
-            num_partitions=2,
-            partition_index=0,
-            batch_size=1,
-            )
+        trainset,
+        num_partitions=2,
+        partition_index=0,
+        batch_size=1,
+    )
     t_loader_1 = PartitionedDataLoader(
-            trainset,
-            num_partitions=2,
-            partition_index=1,
-            batch_size=1,
-            )
+        trainset,
+        num_partitions=2,
+        partition_index=1,
+        batch_size=1,
+    )
     weighted_loader = PartitionedDataLoader(
-            trainset,
-            num_partitions=2,
-            partition_index=0,
-            batch_size=1,
-            target_balance_ratios=list(np.arange(0, 10, step=0.1))
-            )
+        trainset,
+        num_partitions=2,
+        partition_index=0,
+        batch_size=1,
+        target_balance_ratios=list(np.arange(0, 10, step=0.1)),
+    )
 
     print("\nFull:")
     print(train_loader.dataset.data.numpy().shape)
@@ -54,7 +54,9 @@ def test():
 
     print(f"zero set length {len(set(t_loader_0.partition_indices))}")
     print(f"first set length {len(set(t_loader_1.partition_indices))}")
-    print(f"combined set length {len(set([*t_loader_0.partition_indices, *t_loader_1.partition_indices]))}")
+    print(
+        f"combined set length {len(set([*t_loader_0.partition_indices, *t_loader_1.partition_indices]))}"
+    )
 
     print(calculate_class_balance(dataloader=weighted_loader))
 

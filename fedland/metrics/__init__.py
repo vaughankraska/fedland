@@ -12,10 +12,7 @@ import numpy as np
 
 
 def evaluate_all(
-        model: Module,
-        data_loader: DataLoader,
-        criterion: Module,
-        device: torch.device
+    model: Module, data_loader: DataLoader, criterion: Module, device: torch.device
 ) -> Dict[str, Any]:
     """
     Evaluate all metrics:
@@ -30,12 +27,7 @@ def evaluate_all(
     Returns:
         Dict[str, Any]: A dictionary containing all evaluation metrics
     """
-    avg_loss, accuracy = evaluate(
-        model,
-        data_loader,
-        criterion,
-        device
-    )
+    avg_loss, accuracy = evaluate(model, data_loader, criterion, device)
 
     in_size, _ = next(iter(data_loader))
 
@@ -51,7 +43,7 @@ def evaluate_all(
         sigma_min=0.001,
         M1=30,
         M2=10,
-        M3=20
+        M3=20,
     )
 
     frobenius = frobenius_norm(
@@ -59,7 +51,7 @@ def evaluate_all(
         data_loader=data_loader,
         criterion=criterion,
         device=device,
-        num_max=10
+        num_max=10,
     )
 
     return {
@@ -67,16 +59,13 @@ def evaluate_all(
         "accuracy": accuracy,
         "path_norm": p_norm,
         "pac_bayes": bayes,
-        "frobenius_norm": frobenius
+        "frobenius_norm": frobenius,
     }
 
 
 def evaluate(
-        model: Module,
-        data_loader: DataLoader,
-        criterion: Module,
-        device: torch.device
-        ) -> Tuple[float, float]:
+    model: Module, data_loader: DataLoader, criterion: Module, device: torch.device
+) -> Tuple[float, float]:
     """
     Evaluate loss and accuracy metrics:
         Avg Loss, Accuracy
@@ -97,7 +86,7 @@ def evaluate(
             correct += predicted.eq(labels).sum().item()
 
     avg_loss = running_loss / len(data_loader)
-    accuracy = 100. * correct / total
+    accuracy = 100.0 * correct / total
 
     return avg_loss, accuracy
 
@@ -127,7 +116,9 @@ def calculate_class_balance(dataloader: DataLoader) -> Dict[str, Any]:
 
     class_counts = Counter(all_labels)
     total_samples = len(all_labels)
-    class_frequencies = {cls: count / total_samples for cls, count in class_counts.items()}
+    class_frequencies = {
+        cls: count / total_samples for cls, count in class_counts.items()
+    }
 
     # Calculate Gini index
     gini_index = gini(class_counts.values())
@@ -145,4 +136,4 @@ def gini(x: Iterable[float]):
     for i, xi in enumerate(x[:-1], 1):
         diffsum += np.sum(np.abs(xi - x[i:]))
 
-    return diffsum / (len(x)**2 * np.mean(x))
+    return diffsum / (len(x) ** 2 * np.mean(x))

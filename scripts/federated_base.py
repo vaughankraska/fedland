@@ -22,8 +22,12 @@ def create_cmd(name="package.tgz") -> str:
 
 def setup(api: APIClient) -> dict:
     # ensure seed.npz from `fedn run build --path client`
-    assert os.path.exists("package.tgz"), "package.tgz not found, have you run create_cmd OR `fedn package create --path client`?"
-    assert os.path.exists("seed.npz"), "seed.npz not found, have you run `fedn run build --path client`?"
+    assert os.path.exists(
+        "package.tgz"
+    ), "package.tgz not found, have you run create_cmd OR `fedn package create --path client`?"
+    assert os.path.exists(
+        "seed.npz"
+    ), "seed.npz not found, have you run `fedn run build --path client`?"
     create_cmd()  # package.tgz
 
     res = api.set_active_package(path="package.tgz", helper="numpyhelper")
@@ -35,10 +39,10 @@ def setup(api: APIClient) -> dict:
 if __name__ == "__main__":
     date_str = datetime.now().strftime("%Y%m%d%M")
     api = APIClient(
-            "localhost",
-            8092,
-            secure=False,
-            )
+        "localhost",
+        8092,
+        secure=False,
+    )
     # Recompile Model (package.tgz)
     create_cmd()
     # Set package and seed

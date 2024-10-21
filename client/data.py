@@ -9,7 +9,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 abs_path = os.path.abspath(dir_path)
 
 
-def load_data(client_data_path, batch_size=128) ->Tuple[DataLoader, DataLoader]:
+def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]:
     """Load data from disk.
 
     :param data_path: Path to data dir. ex) 'data/path/to'
@@ -35,26 +35,34 @@ def load_data(client_data_path, batch_size=128) ->Tuple[DataLoader, DataLoader]:
     # from the docker container).
     this_clients_name = socket.gethostname()
     client_index = next(
-            (index for index, client in enumerate(clients['result'])
-             if client['name'] == this_clients_name), None
-            )
-    print(f"[*] Client {this_clients_name} loading partition {client_index}/{clients_count}")
-    assert client_index is not None, "Client name couldnt be found in the server's clients"
+        (
+            index
+            for index, client in enumerate(clients["result"])
+            if client["name"] == this_clients_name
+        ),
+        None,
+    )
+    print(
+        f"[*] Client {this_clients_name} loading partition {client_index}/{clients_count}"
+    )
+    assert (
+        client_index is not None
+    ), "Client name couldnt be found in the server's clients"
 
     train_loader = PartitionedDataLoader(
-            training,
-            num_partitions=clients_count,
-            partition_index=client_index,
-            batch_size=batch_size,
-            shuffle=False
-            )
+        training,
+        num_partitions=clients_count,
+        partition_index=client_index,
+        batch_size=batch_size,
+        shuffle=False,
+    )
     test_loader = PartitionedDataLoader(
-            testing,
-            num_partitions=clients_count,
-            partition_index=client_index,
-            batch_size=batch_size,
-            shuffle=False
-            )
+        testing,
+        num_partitions=clients_count,
+        partition_index=client_index,
+        batch_size=batch_size,
+        shuffle=False,
+    )
 
     return train_loader, test_loader
 

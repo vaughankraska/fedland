@@ -12,14 +12,14 @@ sys.path.append(os.path.abspath(dir_path))
 
 
 def train(
-        in_model_path,
-        out_model_path,
-        data_path=None,
-        batch_size=64,
-        epochs=5,
-        lr=0.01,
-        momentum=0.5
-        ):
+    in_model_path,
+    out_model_path,
+    data_path=None,
+    batch_size=64,
+    epochs=5,
+    lr=0.01,
+    momentum=0.5,
+):
     """Complete a model update.
 
     Load model paramters from in_model_path (managed by the FEDn client),
@@ -75,9 +75,11 @@ def train(
 
             if i % 200 == 199:
                 p_norm = path_norm(model, train_loader)
-                print(f'Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}], '  # noqa E501
-                      f'Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%'  # noqa E501
-                      f'PNorm: {p_norm:.4f}')
+                print(
+                    f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}], "  # noqa E501
+                    f"Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%"  # noqa E501
+                    f"PNorm: {p_norm:.4f}"
+                )
                 running_loss, correct, total = 0.0, 0, 0
 
     # Metadata needed for aggregation server side

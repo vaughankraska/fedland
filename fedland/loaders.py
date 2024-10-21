@@ -3,7 +3,13 @@ import torch
 import torchvision
 import numpy as np
 from typing import List
-from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler, WeightedRandomSampler
+from torch.utils.data import (
+    DataLoader,
+    Dataset,
+    SubsetRandomSampler,
+    WeightedRandomSampler,
+)
+
 OUT_DIR = "./data"
 FIXED_SEED = 42
 
@@ -12,15 +18,15 @@ FIXED_SEED = 42
 # TODO: write balanced/imbalanced, IID non-IID loaders
 class PartitionedDataLoader(DataLoader):
     def __init__(
-            self,
-            dataset: Dataset,
-            num_partitions: int,
-            partition_index: int,
-            batch_size=128,
-            target_balance_ratios: List[float] = None,
-            *args, **kwargs
-            ):
-
+        self,
+        dataset: Dataset,
+        num_partitions: int,
+        partition_index: int,
+        batch_size=128,
+        target_balance_ratios: List[float] = None,
+        *args,
+        **kwargs,
+    ):
         if partition_index > num_partitions:
             raise ValueError("partition_index cannot be greater than num_partitions")
         if num_partitions <= 0:
@@ -46,22 +52,24 @@ class PartitionedDataLoader(DataLoader):
 
         if target_balance_ratios is None:
             sampler = SubsetRandomSampler(
-                    indices=self.partition_indices,
-                    generator=generator
-                    )
+                indices=self.partition_indices, generator=generator
+            )
         else:
             sampler = WeightedRandomSampler(
-                    weights=target_balance_ratios,
-                    num_samples=partition_size,
-                    generator=generator,
-                    replacement=True,
-                    )
+                weights=target_balance_ratios,
+                num_samples=partition_size,
+                generator=generator,
+                replacement=True,
+            )
 
-        super().__init__(dataset=dataset,
-                         batch_size=batch_size,
-                         generator=generator,
-                         sampler=sampler,
-                         *args, **kwargs)
+        super().__init__(
+            dataset=dataset,
+            batch_size=batch_size,
+            generator=generator,
+            sampler=sampler,
+            *args,
+            **kwargs,
+        )
 
 
 def load_mnist_data() -> tuple[Dataset, Dataset]:
@@ -76,16 +84,16 @@ def load_mnist_data() -> tuple[Dataset, Dataset]:
         os.mkdir(OUT_DIR)
 
     train_set = torchvision.datasets.MNIST(
-            root=f"{OUT_DIR}/train",
-            transform=torchvision.transforms.ToTensor(),
-            train=True,
-            download=True,
-            )
+        root=f"{OUT_DIR}/train",
+        transform=torchvision.transforms.ToTensor(),
+        train=True,
+        download=True,
+    )
     test_set = torchvision.datasets.MNIST(
-            root=f"{OUT_DIR}/test",
-            transform=torchvision.transforms.ToTensor(),
-            train=False,
-            download=True,
-            )
+        root=f"{OUT_DIR}/test",
+        transform=torchvision.transforms.ToTensor(),
+        train=False,
+        download=True,
+    )
 
     return train_set, test_set
