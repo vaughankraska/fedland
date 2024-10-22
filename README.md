@@ -48,17 +48,31 @@ and data processing are consistent across experiments.
 if you just want to use fedland metrics and such (its pretty bare rn) instal with `pip install fedland`
 
 
-## Running the project
-### In docker:
+## Running the project:
+### In docker
 ```bash
 cd fedland
 docker compose up --build -d
 ```
 
 ### Locally (plus with FEDn Studio)
+Requirements: [poetry](https://python-poetry.org/)
 1. Setup a venv
-2. Run `poetry install` in venv
+2. Run `poetry install --with dev` in venv
 3. Create and fill in the .env fields based on .env.example
     - run: `cp .env.example .env`
 4. Run whatever scripts you want in /scripts
     - eg: `python scripts/centralized_base.py`
+5. Follow FEDn's getting started as if this home dir were a directory in the pytorch-mnist example
+
+
+## Helpful Commands:
+
+### Running tests with:
+```bash
+poetry run pytest tests
+```
+OR in docker container with 
+```bash
+docker compose run --build client poetry run pytest tests/
+```

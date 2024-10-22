@@ -1,4 +1,6 @@
 import numpy as np
+import torch
+from torch.utils.data import Dataset
 from fedland.loaders import PartitionedDataLoader, load_mnist_data
 from fedland.metrics import calculate_class_balance
 
@@ -46,11 +48,30 @@ def test():
     print(f"\n1 indices: {t_loader_1.partition_indices}")
     print(f"len: {len(t_loader_1.partition_indices)}")
 
-    # for i, data in enumerate(t_loader_0):
-    #     inputs = data[0]
-    #     labels = data[1]
-    #     if i % 1_000 == 999:
-    #         print(f'{i} in: {inputs.numpy().shape}, labels = {labels}')
+    class MockDataset(Dataset):
+        def __init__(self, num_samples=1000):
+            # 10 cols
+            self.data = torch.randn(num_samples, 10)
+            # 0, 1, 2 classes
+            self.labels = torch.randint(0, 2, (num_samples,))
+
+        def __len__(self):
+            return len(self.data)
+
+        def __getitem__(self, idx):
+            return self.data[idx], self.labels[idx]
+
+    temp_loader = PartitionedDataLoader(MockDataset(), 1, 0, batch_size=1)
+    for i, data in enumerate(temp_loader):
+        inputs = data[0]
+        labels = data[1]
+        if i % 1_000 == 999:
+            print(f'iterating mocked {i} in: {inputs.numpy().shape}, labels = {labels}')
+    for i, data in enumerate(t_loader_0):
+        inputs = data[0]
+        labels = data[1]
+        if i % 1_000 == 999:
+            print(f'{i} in: {inputs.numpy().shape}, labels = {labels}')
 
     print(f"zero set length {len(set(t_loader_0.partition_indices))}")
     print(f"first set length {len(set(t_loader_1.partition_indices))}")

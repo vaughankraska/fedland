@@ -3,6 +3,7 @@
 *.pyc
 tmp/*
 test/*
+tests/*
 docs/*
 examples/*
 **/.venv

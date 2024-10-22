@@ -14,7 +14,6 @@ OUT_DIR = "./data"
 FIXED_SEED = 42
 
 
-# TODO: test it
 # TODO: write balanced/imbalanced, IID non-IID loaders
 class PartitionedDataLoader(DataLoader):
     def __init__(
@@ -27,11 +26,18 @@ class PartitionedDataLoader(DataLoader):
         *args,
         **kwargs,
     ):
-        if partition_index > num_partitions:
+        if partition_index >= num_partitions:
             raise ValueError("partition_index cannot be greater than num_partitions")
         if num_partitions <= 0:
             raise ValueError("num_partitions must be non-zero and postive")
         # TODO assert target_balance_ratios match dimensions of labels
+        labels_len = len(np.unique(np.array([dataset[i][1] for i in range(len(dataset))])))
+        if target_balance_ratios is not None and \
+                len(target_balance_ratios) != labels_len:
+            raise ValueError(
+                    f"target_balance_ratios (len {len(target_balance_ratios)})"
+                    f" must match dataset labels len({labels_len})"
+                    )
 
         # Defaults for consistency
         generator = torch.Generator().manual_seed(FIXED_SEED)
