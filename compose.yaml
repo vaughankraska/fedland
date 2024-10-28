@@ -31,6 +31,8 @@ services:
     ports:
       - 6534:6534
     command: mongod --port 6534
+    volumes:
+      - ./data:/data/db
 
   mongo-express:
     image: mongo-express:latest
@@ -98,7 +100,7 @@ services:
       - GET_HOSTS_FROM=dns
       - FEDN_PACKAGE_EXTRACT_DIR=package
     deploy:
-      replicas: ${FEDN_NUM_DATA_SPLITS:-5}
+      replicas: ${FEDN_NUM_DATA_SPLITS:-1}
       restart_policy:
         condition: on-failure
         delay: 7s

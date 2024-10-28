@@ -28,7 +28,7 @@ def setup(api: APIClient) -> dict:
     assert os.path.exists(
         "seed.npz"
     ), "seed.npz not found, have you run `fedn run build --path client`?"
-    create_cmd()  # package.tgz
+    create_cmd()  # package.tgz (Recompile package)
 
     res = api.set_active_package(path="package.tgz", helper="numpyhelper")
     print(f"[*] {res.get('message')}")
@@ -43,9 +43,7 @@ if __name__ == "__main__":
         8092,
         secure=False,
     )
-    # Recompile Model (package.tgz)
-    create_cmd()
     # Set package and seed
-    setup(api)
-    session = api.start_session(f"sesh-{date_str}")
+    # setup(api)
+    session = api.start_session(f"sesh-{date_str}", min_clients=2)
     print(f"=>Started Federated Run:\n{session}")

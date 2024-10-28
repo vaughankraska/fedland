@@ -28,6 +28,7 @@ project
 │ ├ train.py
 │ └ validate.py
 ├ data
+│ ├ /db/mongo.files
 │ └ mnist.npz
 ├ fedland (module)
 │ └ __init__.py
@@ -76,3 +77,10 @@ OR in docker container with
 ```bash
 docker compose run --build client poetry run pytest tests/
 ```
+
+### Running Mongo Shell (mongo db instance)
+The default db is the same as the network id (fedn-network)
+```bash
+mongosh "mongodb://0.0.0.0:6534/?authSource=admin" --apiVersion 1 --username fedn_admin
+```
+The db can also be viewed using [Mongo Express webapp here](http://localhost:8081/db/fedn-network/)

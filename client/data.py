@@ -24,10 +24,10 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         client_data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/")
 
     training, testing = load_mnist_data()
-    # TODO: figure out the how to partition from centralized call
     api_host = os.environ.get("FEDN_SERVER_HOST", "api-server")
     api_port = os.environ.get("FEDN_SERVER_PORT", 8092)
     api = APIClient(api_host, api_port)
+    # TODO get_active_cleints() indead!!
     clients = api.get_clients()
     clients_count = clients.get("count", 0)
 

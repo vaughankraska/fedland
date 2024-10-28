@@ -25,5 +25,4 @@ num_workers: 1
 #     "logfile": logfile,
 #     "heartbeat_interval": heartbeat_interval,
 #     "reconnect_after_missed_heartbeat": reconnect_after_missed_heartbeat,
-#     "verbosity": verbosity,
 # }

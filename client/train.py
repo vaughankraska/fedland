@@ -75,6 +75,7 @@ def train(
 
             if i % 200 == 199:
                 p_norm = path_norm(model, train_loader)
+                # TODO dump to mongodb
                 print(
                     f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}], "  # noqa E501
                     f"Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%"  # noqa E501
