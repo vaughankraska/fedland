@@ -4,25 +4,3 @@ lr: 0.01
 batch_size: 64
 local_epochs: 5
 num_workers: 1
-# config = {  # source for reference
-#     "discover_host": discoverhost,
-#     "discover_port": discoverport,
-#     "token": token,
-#     "name": name,
-#     "client_id": client_id,
-#     "remote_compute_context": remote,
-#     "force_ssl": force_ssl,
-#     "dry_run": dry_run,
-#     "secure": secure,
-#     "preshared_cert": preshared_cert,
-#     "verify": verify,
-#     "preferred_combiner": preferred_combiner,
-#     "combiner": combiner,
-#     "combiner_port": combiner_port,
-#     "proxy_server": proxy_server,
-#     "validator": validator,
-#     "trainer": trainer,
-#     "logfile": logfile,
-#     "heartbeat_interval": heartbeat_interval,
-#     "reconnect_after_missed_heartbeat": reconnect_after_missed_heartbeat,
-# }

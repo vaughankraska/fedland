@@ -44,6 +44,6 @@ if __name__ == "__main__":
         secure=False,
     )
     # Set package and seed
-    # setup(api)
-    session = api.start_session(f"sesh-{date_str}", min_clients=2)
-    print(f"=>Started Federated Run:\n{session}")
+    setup(api)
+    # session = api.start_session(f"sesh-{date_str}", min_clients=3)
+    # print(f"=>Started Federated Run:\n{session}")

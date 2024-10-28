@@ -3,6 +3,7 @@ import torch
 import torchvision
 import numpy as np
 from typing import List, Sequence, Iterator
+from enum import Enum
 from torch.utils.data import (
     DataLoader,
     Dataset,
@@ -10,18 +11,26 @@ from torch.utils.data import (
     SubsetRandomSampler,
 )
 
+# TODO! getting a little beefy, split into other files/module
+
 OUT_DIR = "./data"
 FIXED_SEED = 42
 np.random.seed(FIXED_SEED)
 
 
+class DatasetIdentifier(Enum):
+    CIFAR = "CIFAR"
+    MNIST = "MNIST"
+
+
 class SubsetWeightedRandomSampler(Sampler[int]):
-    """Samples elements from a given list of indices with specified weights, with replacement.
-    (Hybrid between SubsetSampler and WeightedRandomSampler from Pytorch)
+    """Samples elements from a given list of indices with specified weights,
+    with replacement - Hybrid between SubsetSampler and WeightedRandomSampler
+    from Pytorch.
 
     Args:
-        weights (Tensor): a sequence of weights, not necessary summing up to one
-        num_samples (int): number of samples to draw
+        weights (Tensor): a sequence of weights, not necessary summing up to
+        one num_samples (int): number of samples to draw
         indices (sequence): a sequence of indices
         generator (Generator): Generator used in sampling.
     """
@@ -51,7 +60,6 @@ class SubsetWeightedRandomSampler(Sampler[int]):
         return self.num_samples
 
 
-# TODO: write balanced/imbalanced, IID non-IID loaders
 class PartitionedDataLoader(DataLoader):
     def __init__(
         self,
@@ -65,7 +73,9 @@ class PartitionedDataLoader(DataLoader):
         **kwargs,
     ):
         if partition_index >= num_partitions:
-            raise ValueError("partition_index cannot be greater than num_partitions")
+            raise ValueError(
+                    "partition_index cannot be greater than num_partitions"
+                    )
 
         if num_partitions <= 0:
             raise ValueError("num_partitions must be non-zero and postive")
@@ -112,7 +122,9 @@ class PartitionedDataLoader(DataLoader):
             )
         else:
             # Sample the specified target ratios (assumes classes)
-            current_class_counts = np.bincount(partition_labels, minlength=len(uni_labels))
+            current_class_counts = np.bincount(
+                    partition_labels, minlength=len(uni_labels)
+                    )
             current_class_ratios = current_class_counts / len(partition_labels)
 
             # Calculate weights for each class
@@ -140,6 +152,33 @@ class PartitionedDataLoader(DataLoader):
         )
 
 
+def load_cifar_data() -> tuple[Dataset, Dataset]:
+    """
+    Loads the CIFAR10 Dataset using the built in torchvision data loaders.
+
+    returns:
+        Tuple[Dataset, Dataset]: Tuple of training and testing Datasets
+    """
+    torch.manual_seed(FIXED_SEED)
+    if not os.path.exists(OUT_DIR):
+        os.mkdir(OUT_DIR)
+
+    train_set = torchvision.datasets.CIFAR10(
+        root=f"{OUT_DIR}/train",
+        transform=torchvision.transforms.ToTensor(),
+        train=True,
+        download=True,
+    )
+    test_set = torchvision.datasets.CIFAR10(
+        root=f"{OUT_DIR}/test",
+        transform=torchvision.transforms.ToTensor(),
+        train=False,
+        download=True,
+    )
+
+    return train_set, test_set
+
+
 def load_mnist_data() -> tuple[Dataset, Dataset]:
     """
     Loads the MNIST Dataset using the built in torchvision data loaders.
@@ -165,3 +204,16 @@ def load_mnist_data() -> tuple[Dataset, Dataset]:
     )
 
     return train_set, test_set
+
+
+DATA_LOADER_MAP = {
+    "CIFAR": load_cifar_data,
+    "MNIST": load_mnist_data,
+}
+
+
+def load_dataset(identifier: DatasetIdentifier) -> tuple[Dataset, Dataset]:
+    if identifier in DATA_LOADER_MAP:
+        return DATA_LOADER_MAP[identifier]()
+    else:
+        raise ValueError(f"Unknown dataset identifier: {identifier}")

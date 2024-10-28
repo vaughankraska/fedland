@@ -1,9 +1,13 @@
 import os
 import sys
+import socket
 import torch
 import torch.optim as optim
+from fedn import APIClient
 from fedn.utils.helpers.helpers import save_metadata
-from fedland.metrics import path_norm
+from fedn.network.api.v1.session_routes import session_store
+from fedland.metrics import evaluate_all
+from fedland.database_models.experiment import experiment_store
 from model import load_parameters, save_parameters
 from data import load_data
 
@@ -44,6 +48,20 @@ def train(
     :param momentum: The momentum rate to use.
     :type momentum: float
     """
+    # TODO: cleanup or find something better
+    api_host = os.environ.get("FEDN_SERVER_HOST", "api-server")
+    api_port = os.environ.get("FEDN_SERVER_PORT", 8092)
+    api = APIClient(api_host, api_port)
+    clients = api.get_clients()
+    this_clients_name = socket.gethostname()
+    client_index = next((
+        index
+        for index, client in enumerate(clients["result"])
+        if client["name"] == this_clients_name
+        ), None,)
+    session_id = session_store.list(limit=1, skip=0, sort_key="session_id")
+    experiment_id = experiment_store.get_latest()
+
     # Load data
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_loader, _ = load_data(data_path, batch_size=batch_size)
@@ -74,14 +92,30 @@ def train(
             correct += predicted.eq(labels).sum().item()
 
             if i % 200 == 199:
-                p_norm = path_norm(model, train_loader)
-                # TODO dump to mongodb
-                print(
-                    f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}], "  # noqa E501
-                    f"Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%"  # noqa E501
-                    f"PNorm: {p_norm:.4f}"
-                )
-                running_loss, correct, total = 0.0, 0, 0
+                try:
+                    stats = evaluate_all(model, train_loader, criterion, device)
+                    print(
+                        f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
+                        f"Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%,\n"  # noqa E501
+                        f"PathNorm: {stats.get("path_norm"):.4f}"
+                    )
+                    running_loss, correct, total = 0.0, 0, 0
+                    new_local_round = {
+                        "session_id": session_id,
+                        "epoch": epoch,
+                        "loss": running_loss,
+                        "path_norm": stats.get("path_norm"),
+                        "pac_bayes_bound": stats.get("pac_bayes"),
+                        "frobenius_norm": stats.get("frobenius_norm"),
+                    }
+                    # TODO: fix dump to mongo
+                    experiment_store.client_stat_store.append_local_round(
+                        experiment_id=experiment_id,
+                        client_index=client_index,
+                        local_round=new_local_round
+                    )
+                except Exception as e:
+                    print(f"[!!!] Error: {e}")
 
     # Metadata needed for aggregation server side
     metadata = {

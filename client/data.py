@@ -1,8 +1,12 @@
 import os
 import socket
+import time
 from typing import Tuple
 from fedn import APIClient
-from fedland.loaders import load_mnist_data, PartitionedDataLoader
+from fedland.loaders import PartitionedDataLoader, load_dataset
+from fedland.metrics import calculate_class_balance
+from fedland.database_models.client_stat import ClientStat
+from fedland.database_models.experiment import experiment_store
 from torch.utils.data import DataLoader
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -23,28 +27,28 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         print("[*] Client Data path is None")
         client_data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/")
 
-    training, testing = load_mnist_data()
+    latest_experiment = experiment_store.get_latest()
+    while latest_experiment is None:
+        print("[*] Waiting for Experiment...")
+        time.sleep(5)
+        latest_experiment = experiment_store.get_latest()
+
+
+    training, testing = load_dataset(latest_experiment.dataset_name)
     api_host = os.environ.get("FEDN_SERVER_HOST", "api-server")
     api_port = os.environ.get("FEDN_SERVER_PORT", 8092)
     api = APIClient(api_host, api_port)
-    # TODO get_active_cleints() indead!!
     clients = api.get_clients()
-    clients_count = clients.get("count", 0)
+    clients_count = api.get_active_clients()
 
     # The client's name should be set to the hostname (which is the hash
     # from the docker container).
     this_clients_name = socket.gethostname()
-    client_index = next(
-        (
-            index
-            for index, client in enumerate(clients["result"])
-            if client["name"] == this_clients_name
-        ),
-        None,
-    )
-    print(
-        f"[*] Client {this_clients_name} loading partition {client_index}/{clients_count}"
-    )
+    client_index = next((
+        index for index, client in enumerate(clients["result"])
+        if client["name"] == this_clients_name
+        ), None)
+    print(f"[*] Client {this_clients_name} loading partition {client_index + 1}/{clients_count}")
     assert (
         client_index is not None
     ), "Client name couldnt be found in the server's clients"
@@ -64,10 +68,20 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         shuffle=False,
     )
 
+    client_stat = ClientStat(
+        experiment_id=latest_experiment.id,
+        client_index=client_index,
+        data_indices=train_loader.partition_indices,
+        balance=calculate_class_balance(train_loader),
+        local_rounds=[]
+    )
+    experiment_store.client_stat_store.create_or_update(client_stat)
+
     return train_loader, test_loader
 
 
 if __name__ == "__main__":
+    print("[*] data.py")
     # Prepare data if not already done
-    if not os.path.exists(abs_path + "/data"):
-        load_mnist_data()
+    # if not os.path.exists(abs_path + "/data"):
+    #     load_mnist_data()
