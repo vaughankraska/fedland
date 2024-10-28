@@ -2,16 +2,52 @@ import os
 import torch
 import torchvision
 import numpy as np
-from typing import List
+from typing import List, Sequence, Iterator
 from torch.utils.data import (
     DataLoader,
     Dataset,
+    Sampler,
     SubsetRandomSampler,
-    WeightedRandomSampler,
 )
 
 OUT_DIR = "./data"
 FIXED_SEED = 42
+
+
+class SubsetWeightedRandomSampler(Sampler[int]):
+    """Samples elements from a given list of indices with specified weights, with replacement.
+    (Hybrid between SubsetSampler and WeightedRandomSampler from Pytorch)
+
+    Args:
+        weights (Tensor): a sequence of weights, not necessary summing up to one
+        num_samples (int): number of samples to draw
+        indices (sequence): a sequence of indices
+        generator (Generator): Generator used in sampling.
+    """
+
+    def __init__(
+            self,
+            weights: torch.Tensor,
+            num_samples: int,
+            indices: Sequence[int],
+            generator=None
+            ) -> None:
+
+        self.weights = weights
+        self.num_samples = num_samples
+        self.indices = indices
+        self.generator = generator
+
+    def __iter__(self) -> Iterator[int]:
+        rand_tensor = torch.multinomial(
+            self.weights, self.num_samples,
+            replacement=True, generator=self.generator
+        )
+        for idx in rand_tensor:
+            yield self.indices[idx]
+
+    def __len__(self) -> int:
+        return self.num_samples
 
 
 # TODO: write balanced/imbalanced, IID non-IID loaders
@@ -30,13 +66,14 @@ class PartitionedDataLoader(DataLoader):
             raise ValueError("partition_index cannot be greater than num_partitions")
         if num_partitions <= 0:
             raise ValueError("num_partitions must be non-zero and postive")
-        # TODO assert target_balance_ratios match dimensions of labels
-        labels_len = len(np.unique(np.array([dataset[i][1] for i in range(len(dataset))])))
+
+        labels = np.array([dataset[i][1] for i in range(len(dataset))])
+        uni_labels = np.unique(labels)
         if target_balance_ratios is not None and \
-                len(target_balance_ratios) != labels_len:
+                len(target_balance_ratios) != len(uni_labels):
             raise ValueError(
                     f"target_balance_ratios (len {len(target_balance_ratios)})"
-                    f" must match dataset labels len({labels_len})"
+                    f" must match dataset labels len({len(uni_labels)})"
                     )
 
         # Defaults for consistency
@@ -55,18 +92,31 @@ class PartitionedDataLoader(DataLoader):
         start_idx = partition_index * partition_size
         end_idx = start_idx + partition_size
         self.partition_indices = indices[start_idx:end_idx]
+        partition_labels = labels[self.partition_indices]
 
         if target_balance_ratios is None:
             sampler = SubsetRandomSampler(
                 indices=self.partition_indices, generator=generator
             )
         else:
-            sampler = WeightedRandomSampler(
-                weights=target_balance_ratios,
-                num_samples=partition_size,
-                generator=generator,
-                replacement=True,
-            )
+            # Sample the specified target ratios (assumes classes)
+            current_class_counts = np.bincount(partition_labels, minlength=len(uni_labels))
+            current_class_ratios = current_class_counts / len(partition_labels)
+
+            # Calculate weights for each class
+            weights = np.zeros(len(partition_labels))
+            for label_idx, target_ratio in enumerate(target_balance_ratios):
+                if current_class_ratios[label_idx] > 0:
+                    label_weight = target_ratio / current_class_ratios[label_idx]
+                    weights[partition_labels == label_idx] = label_weight
+
+            weights = torch.from_numpy(weights).float()
+            sampler = SubsetWeightedRandomSampler(
+                    indices=self.partition_indices,
+                    weights=weights,
+                    num_samples=partition_size,
+                    generator=generator,
+                    )
 
         super().__init__(
             dataset=dataset,

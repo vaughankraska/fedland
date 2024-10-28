@@ -1,7 +1,8 @@
 import pytest
-import numpy as np
 from collections import Counter
 from fedland.loaders import PartitionedDataLoader
+
+WIGGLE_ROOM = 0.01
 
 
 def test_partitioned_loader_fails_negative_params(dataset):
@@ -29,7 +30,8 @@ def test_partitioned_loader_fails_mismatched_weights(dataset):
 def test_partitioned_loader_with_target_ratios(dataset):
     target_ratios = [0.1, 0.6, 0.3]
     loader = PartitionedDataLoader(
-            dataset, 3, 0, target_balance_ratios=target_ratios
+            dataset, 3, 0, batch_size=1,
+            target_balance_ratios=target_ratios
             )
 
     sampled_labels = []
@@ -49,7 +51,74 @@ def test_partitioned_loader_with_target_ratios(dataset):
         expected_ratio = expected.get(label, 0)
         actual_ratio = actual.get(label, 0)
 
-        assert abs(actual_ratio - expected_ratio) <= 0.05, (
+        assert abs(actual_ratio - expected_ratio) <= WIGGLE_ROOM, (
+                f"Label {label}: expected ratio {expected_ratio}, "
+                f"actual ratio {actual_ratio}"
+                )
+
+
+def test_partitioned_loader_with_target_ratios_with_zero(dataset):
+    target_ratios = [0.0, 0.9, 0.1]
+    loader = PartitionedDataLoader(
+            dataset, 3, 0, batch_size=1,
+            target_balance_ratios=target_ratios
+            )
+
+    sampled_labels = []
+    for _, data in enumerate(loader):
+        label = data[1]
+        sampled_labels.extend(label.numpy())
+
+    label_counts = Counter(sampled_labels)
+    total_samples = len(sampled_labels)
+
+    actual = {label: count / total_samples
+              for label, count in label_counts.items()}
+    expected = {label: ratio
+                for label, ratio in zip(range(3), target_ratios)}
+
+    for label in range(len(target_ratios)):
+        expected_ratio = expected.get(label, 0)
+        actual_ratio = actual.get(label, 0)
+
+        assert abs(actual_ratio - expected_ratio) <= WIGGLE_ROOM, (
+                f"Label {label}: expected ratio {expected_ratio}, "
+                f"actual ratio {actual_ratio}"
+                )
+
+
+def test_partitioned_loader_with_target_ratios_with_batches(dataset):
+    target_ratios = [0.1, 0.8, 0.1]
+    batch_size = 128
+    loader = PartitionedDataLoader(
+            dataset, 3, 0,
+            batch_size=batch_size,
+            target_balance_ratios=target_ratios
+            )
+
+    sampled_labels = []
+    for batch_idx, (data, labels) in enumerate(loader):
+        # Check batch dimension
+        assert data.shape[0] == labels.shape[0], \
+            f"Batch {batch_idx}: Data and label batch sizes don't match"
+        sampled_labels.extend(labels.numpy())
+        if batch_idx < len(loader) - 1:
+            assert data.shape[0] == batch_size, \
+                f"Batch {batch_idx} size {data.shape[0]} != {batch_size}"
+
+    label_counts = Counter(sampled_labels)
+    total_samples = len(sampled_labels)
+
+    actual = {label: count / total_samples
+              for label, count in label_counts.items()}
+    expected = {label: ratio
+                for label, ratio in zip(range(3), target_ratios)}
+
+    for label in range(len(target_ratios)):
+        expected_ratio = expected.get(label, 0)
+        actual_ratio = actual.get(label, 0)
+
+        assert abs(actual_ratio - expected_ratio) <= WIGGLE_ROOM, (
                 f"Label {label}: expected ratio {expected_ratio}, "
                 f"actual ratio {actual_ratio}"
                 )

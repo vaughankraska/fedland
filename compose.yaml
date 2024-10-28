@@ -23,7 +23,6 @@ services:
       - 9001:9001
 
   mongo:
-    # TODO: make persistent with volume
     image: mongo:7.0
     restart: always
     environment:

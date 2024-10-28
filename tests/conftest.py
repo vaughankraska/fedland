@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 
 class MockDataset(Dataset):
     torch.manual_seed(42)
-    def __init__(self, num_samples=1000):
+    def __init__(self, num_samples=10000):
         # 10 cols
         self.data = torch.randn(num_samples, 10)
         # 0, 1, 2 classes
