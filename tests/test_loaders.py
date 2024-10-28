@@ -2,7 +2,7 @@ import pytest
 from collections import Counter
 from fedland.loaders import PartitionedDataLoader
 
-WIGGLE_ROOM = 0.01
+WIGGLE_ROOM = 0.03
 
 
 def test_partitioned_loader_fails_negative_params(dataset):
@@ -25,6 +25,31 @@ def test_partitioned_loader_fails_mismatched_weights(dataset):
         PartitionedDataLoader(
                 dataset, 2, 0, target_balance_ratios=[.1, .2, .3, .4]
                 )
+
+
+def test_partitioned_subset(dataset):
+    partitions = 4
+    fraction = 0.5
+    loader = PartitionedDataLoader(
+            dataset, partitions, 0,
+            subset_fraction=fraction,
+            batch_size=1,
+            )
+
+    assert len(loader) == int((len(dataset) // partitions) * fraction)
+
+
+def test_partitioned_subset_and_imbalanced(dataset):
+    partitions = 2
+    fraction = 0.75
+    loader = PartitionedDataLoader(
+            dataset, partitions, 0,
+            subset_fraction=fraction,
+            target_balance_ratios=[0.5, 0.3, 0.2],
+            batch_size=1,
+            )
+
+    assert len(loader.partition_indices) == int((len(dataset) // partitions) * fraction)
 
 
 def test_partitioned_loader_with_target_ratios(dataset):

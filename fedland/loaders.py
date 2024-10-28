@@ -12,6 +12,7 @@ from torch.utils.data import (
 
 OUT_DIR = "./data"
 FIXED_SEED = 42
+np.random.seed(FIXED_SEED)
 
 
 class SubsetWeightedRandomSampler(Sampler[int]):
@@ -59,11 +60,13 @@ class PartitionedDataLoader(DataLoader):
         partition_index: int,
         batch_size=128,
         target_balance_ratios: List[float] = None,
+        subset_fraction=1,
         *args,
         **kwargs,
     ):
         if partition_index >= num_partitions:
             raise ValueError("partition_index cannot be greater than num_partitions")
+
         if num_partitions <= 0:
             raise ValueError("num_partitions must be non-zero and postive")
 
@@ -74,6 +77,11 @@ class PartitionedDataLoader(DataLoader):
             raise ValueError(
                     f"target_balance_ratios (len {len(target_balance_ratios)})"
                     f" must match dataset labels len({len(uni_labels)})"
+                    )
+
+        if subset_fraction > 1 or subset_fraction < 0:
+            raise ValueError(
+                    f"subset_fraction={subset_fraction} must be > 0 and <= 1"
                     )
 
         # Defaults for consistency
@@ -91,7 +99,11 @@ class PartitionedDataLoader(DataLoader):
         partition_size = len(dataset) // num_partitions
         start_idx = partition_index * partition_size
         end_idx = start_idx + partition_size
-        self.partition_indices = indices[start_idx:end_idx]
+        self.partition_indices = np.random.choice(
+                indices[start_idx:end_idx],
+                int(partition_size * subset_fraction),
+                replace=False,
+                )
         partition_labels = labels[self.partition_indices]
 
         if target_balance_ratios is None:
