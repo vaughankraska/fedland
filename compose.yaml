@@ -94,13 +94,12 @@ services:
   client:
     build:
       context: .
-      args:
-        FEDN_NUM_DATA_SPLITS: ${FEDN_NUM_DATA_SPLITS:-5}
     environment:
       - GET_HOSTS_FROM=dns
       - FEDN_PACKAGE_EXTRACT_DIR=package
+      - STATESTORE_CONFIG=/workspace/settings-state.yaml
     deploy:
-      replicas: ${FEDN_NUM_DATA_SPLITS:-1}
+      replicas: 2
       restart_policy:
         condition: on-failure
         delay: 7s
@@ -110,9 +109,32 @@ services:
       combiner:
         condition: service_healthy
     volumes:
-      # TODO! Configure session here too.
-      - ./client-settings.yaml:/workspace/client-settings.yaml
+      - ./settings-client.yaml:/workspace/settings-client.yaml
+      - ./settings-state.yaml:/workspace/settings-state.yaml
       - shared-data:/workspace/package/client/data
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /workspace
+          ignore:
+            - .git/
+            - "*.pyc"
+            - "*.tgz"
+            - "*.npz"
+            - "__pycache__"
+            - "data/"
+            - "tests/"
+            - "dist/"
+            - "results/"
+            - "scripts/"
+        - action: rebuild
+          path: Dockerfile
+        - action: rebuild
+          path: pyproject.toml
+        - action: rebuild
+          path: setup.py
+
 volumes:
   shared-data:
     driver: local

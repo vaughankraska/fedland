@@ -75,7 +75,8 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         balance=calculate_class_balance(train_loader),
         local_rounds=[]
     )
-    experiment_store.client_stat_store.create_or_update(client_stat)
+    succ = experiment_store.client_stat_store.create_or_update(client_stat)
+    print(f"[*] ClientStat Added or Updated? {succ}")
 
     return train_loader, test_loader
 

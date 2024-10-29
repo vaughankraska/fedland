@@ -1,7 +1,7 @@
 from typing import Dict, List, Self, Optional
 from typing_extensions import override
-import pymongo
 from pymongo.database import Database
+from bson import ObjectId
 from fedland.database_models.client_stat import ClientStat, ClientStatStore
 from fedn.network.storage.statestore.stores.store import Store
 from fedn.network.api.v1.shared import mdb
@@ -54,7 +54,7 @@ class Experiment:
                     ]
 
         return cls(
-            id=str(data["_id"]),
+            id=str(data.get("_id") or data["id"]),
             description=data.get("description"),
             dataset_name=data.get("dataset_name"),
             model=data.get("model"),
@@ -72,7 +72,7 @@ class ExperimentStore(Store[Experiment]):
         super().__init__(database, collection)
         self.client_stat_store = ClientStatStore(database, "local.client_stats")
 
-    def create_experiment(self, experiment: Experiment) -> str:
+    def create_experiment(self, experiment: Experiment) -> Optional[str]:
         """
         Creates a new experiment in the database.
         Args:
@@ -83,19 +83,25 @@ class ExperimentStore(Store[Experiment]):
             str: The ID of the created experiment
         """
         experiment_dict = experiment.to_dict()
-        result = self.collection.insert_one(experiment_dict)
+        succ, result = self.add(experiment_dict)
+        if not succ:
+            print(f"[!] Error creating Experiment {result}")
+            return None
+
+        print(result)
+        created_exp = Experiment.from_dict(result)
 
         # Create client stats if they exist
         for client_stat in experiment.client_stats:
-            client_stat.experiment_id = str(result.inserted_id)
+            client_stat.experiment_id = str(created_exp.id)
             self.client_stat_store.create_or_update(client_stat)
 
-        return str(result.inserted_id)
+        return created_exp.id
 
     @override
-    def get(self, id: str, use_typing: bool = False) -> Experiment:
+    def get(self, id: str, use_typing: bool = False) -> Optional[Experiment]:
         """Get an experiment by id with its associated client statistics"""
-        experiment = self.collection.find_one({"_id": pymongo.ObjectId(id)})
+        experiment = self.database[self.collection].find_one({"_id": ObjectId(id)})
         if not experiment:
             return None
 
@@ -115,11 +121,13 @@ class ExperimentStore(Store[Experiment]):
     def get_latest(self) -> Optional[Experiment]:
         """Get latest experiment, if any"""
         experiments = self.list(limit=1, skip=0, sort_key="timestamp")
+        print(experiments)
 
-        if len(experiments) == 0:
+        if experiments.get("count", 0) == 0:
             return None
         else:
-            return experiments[0]
+            exp_dict = experiments["result"][0]
+            return Experiment.from_dict(exp_dict)
 
 
 experiment_store = ExperimentStore(mdb, "local.experiments")

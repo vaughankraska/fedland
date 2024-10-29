@@ -94,19 +94,24 @@ def train(
             if i % 200 == 199:
                 try:
                     stats = evaluate_all(model, train_loader, criterion, device)
+                    pn = stats.get("path_norm")
+                    pb = stats.get("pac_bayes")
+                    fn = stats.get("frobenius_norm")
                     print(
                         f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
                         f"Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%,\n"  # noqa E501
-                        f"PathNorm: {stats.get("path_norm"):.4f}"
+                        f"PathNorm: {pn:.4f}\n"
+                        f"PacBayesBound: {pb}\n"
+                        f"Frobenius: {fn}\n"
                     )
                     running_loss, correct, total = 0.0, 0, 0
                     new_local_round = {
                         "session_id": session_id,
                         "epoch": epoch,
                         "loss": running_loss,
-                        "path_norm": stats.get("path_norm"),
-                        "pac_bayes_bound": stats.get("pac_bayes"),
-                        "frobenius_norm": stats.get("frobenius_norm"),
+                        "path_norm": pn,
+                        "pac_bayes_bound": pb,
+                        "frobenius_norm": fn,
                     }
                     # TODO: fix dump to mongo
                     experiment_store.client_stat_store.append_local_round(

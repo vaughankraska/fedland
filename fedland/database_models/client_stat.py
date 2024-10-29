@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Self
 import pymongo
 from pymongo.database import Database
 from fedn.network.storage.statestore.stores.store import Store
-from fedn.network.api.v1.shared import mdb
 
 
 class ClientStat:
@@ -43,10 +42,10 @@ class ClientStat:
 class ClientStatStore(Store[ClientStat]):
     def __init__(self, database: Database, collection: str):
         super().__init__(database, collection)
-        # self.collection.create_index([
-        #     ("experiment_id", pymongo.ASCENDING),
-        #     ("client_index", pymongo.ASCENDING)
-        #     ], unique=True)
+        self.database[self.collection].create_index([
+            ("experiment_id", pymongo.ASCENDING),
+            ("client_index", pymongo.ASCENDING)
+            ], unique=True)
 
     def get(
             self,
@@ -65,7 +64,7 @@ class ClientStatStore(Store[ClientStat]):
         Returns:
             ClientStat or dict: The client data
         """
-        response = self.collection.find_one({
+        response = self.database[self.collection].find_one({
             "experiment_id": experiment_id,
             "client_index": client_index
             })
@@ -84,7 +83,7 @@ class ClientStatStore(Store[ClientStat]):
             bool: True if operation was successful
         """
         try:
-            self.collection.update_one(
+            self.database[self.collection].update_one(
                     {
                         "experiment_id": client_data.experiment_id,
                         "client_index": client_data.client_index
@@ -115,7 +114,7 @@ class ClientStatStore(Store[ClientStat]):
             bool: True if update was successful
         """
         try:
-            result = self.collection.update_one(
+            result = self.database[self.collection].update_one(
                     {
                         "experiment_id": experiment_id,
                         "client_index": client_index
@@ -146,11 +145,11 @@ class ClientStatStore(Store[ClientStat]):
         Returns:
             Dict containing count and result list
         """
-        cursor = self.collection.find(
+        cursor = self.database[self.collection].find(
                 {"experiment_id": experiment_id}
                 ).skip(skip).limit(limit)
 
-        count = self.collection.count_documents(
+        count = self.database[self.collection].count_documents(
                 {"experiment_id": experiment_id}
                 )
         result = list(cursor)

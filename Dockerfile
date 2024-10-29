@@ -20,4 +20,4 @@ RUN poetry config virtualenvs.create false && \
 
 # TODO: optimize and minimize
 
-CMD ["sh", "-c", "fedn client start -n $(hostname) --init client-settings.yaml" ]
+CMD ["sh", "-c", "fedn client start -n $(hostname) --init settings-client.yaml" ]
