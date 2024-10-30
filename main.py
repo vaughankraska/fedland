@@ -1,4 +1,4 @@
-# This file is an entry point to run all the experiments in /scripts
+# This file is an entry point to run all the experiments
 import os
 import time
 import tarfile
@@ -6,28 +6,33 @@ from datetime import datetime
 from fedn import APIClient
 
 
+# CONSTANTS
+ROUNDS = 100
+HELPER = "numpyhelper"
+AGGREGATOR = "fedavg"
+
 session_config = {
-        "helper": "numpyhelper",
-        "id": "todo",  # "sesh-" + datetime.now().strftime("%Y%m%d%M"),
-        "aggregator": "fedavg",
-        "rounds": 100,
-        "validate": False,
-        "min_clients": "todo",  # clients get scaled in docker (manual)
-        }
+    "helper": "numpyhelper",
+    "id": "todo",  # "sesh-" + datetime.now().strftime("%Y%m%d%M"),
+    "aggregator": "fedavg",
+    "rounds": 100,
+    "validate": False,
+    "min_clients": "todo",  # clients get scaled in docker (manual)
+}
 # TODO: init, experiments from here, add clients/rounds from each client (inspo GridSearchCV)
 EXPERIMENTS = [
-        {
-            "description": "Experiment 1",
-            "dataset_name": "MNIST",
-            "model": "CNN",
-            "timestamp": datetime.now(),
-            "active_clients": 0,
-            "learning_rate": 0.01,
-            "target_balance_ratios": None,
-            "subset_fractions": None,
-            "client_stats": None,
-            }
-        ]
+    {
+        "description": "Experiment 1",
+        "dataset_name": "MNIST",
+        "model": "CNN",
+        "timestamp": datetime.now(),
+        "active_clients": 0,
+        "learning_rate": 0.01,
+        "target_balance_ratios": None,
+        "subset_fractions": None,
+        "client_stats": None,
+    }
+]
 
 
 def create_cmd(name="package.tgz") -> str:

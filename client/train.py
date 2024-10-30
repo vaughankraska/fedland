@@ -7,7 +7,7 @@ from datetime import datetime
 from fedn import APIClient
 from fedn.utils.helpers.helpers import save_metadata
 from fedn.network.api.v1.session_routes import session_store
-from fedland.metrics import path_norm, pac_bayes_bound
+from fedland.metrics import path_norm
 from fedland.database_models.experiment import experiment_store
 from model import load_parameters, save_parameters
 from data import load_data
@@ -55,11 +55,14 @@ def train(
     api = APIClient(api_host, api_port)
     clients = api.get_clients()
     this_clients_name = socket.gethostname()
-    client_index = next((
-        index
-        for index, client in enumerate(clients["result"])
-        if client["name"] == this_clients_name
-        ), None,)
+    client_index = next(
+        (
+            index
+            for index, client in enumerate(clients["result"])
+            if client["name"] == this_clients_name
+        ),
+        None,
+    )
 
     session_id = session_store.list(limit=1, skip=0, sort_key="session_id")
     experiment = experiment_store.get_latest()
@@ -102,19 +105,16 @@ def train(
             correct += predicted.eq(labels).sum().item()
 
         # Do reporting each local epoch
-        train_accuracy = 100.*correct/total
-        print(f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
-              f"Train Loss: {running_loss:.3f}, Train Accuracy: {train_accuracy:.2f}%,\n"  # noqa E501
-              )
+        train_accuracy = 100.0 * correct / total
+        print(
+            f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
+            f"Train Loss: {running_loss:.3f}, Train Accuracy: {train_accuracy:.2f}%,\n"  # noqa E501
+        )
         try:
             pn = path_norm(model, train_loader)
             pb = 0.0  # TODO
             fn = 0.0  # TODO implement faster (too slow)
-            print(
-                f"PathNorm: {pn:.4f}\n"
-                f"PacBayesBound: {pb}\n"
-                f"Frobenius: {fn}\n"
-            )
+            print(f"PathNorm: {pn:.4f}\n" f"PacBayesBound: {pb}\n" f"Frobenius: {fn}\n")
             running_loss, correct, total = 0.0, 0, 0
             new_local_round = {
                 "session_id": session_id,
@@ -130,7 +130,7 @@ def train(
             did_insert = experiment_store.client_stat_store.append_local_round(
                 experiment_id=experiment_id,
                 client_index=client_index,
-                local_round=new_local_round
+                local_round=new_local_round,
             )
             print(f"[*] Appended Stats? {did_insert}")
         except Exception as e:

@@ -49,9 +49,7 @@ class Experiment:
     def from_dict(cls, data: dict) -> Self:
         client_stats = []
         if "client_stats" in data:
-            client_stats = [
-                    ClientStat.from_dict(stat) for stat in data["client_stats"]
-                    ]
+            client_stats = [ClientStat.from_dict(stat) for stat in data["client_stats"]]
 
         return cls(
             id=str(data.get("_id") or data["id"]),
@@ -63,7 +61,7 @@ class Experiment:
             learning_rate=data.get("learning_rate", 0.1),
             target_balance_ratios=data.get("target_balance_ratios", None),
             subset_fractions=data.get("subset_fractions", None),
-            client_stats=client_stats
+            client_stats=client_stats,
         )
 
 
@@ -106,8 +104,7 @@ class ExperimentStore(Store[Experiment]):
 
         # Get associated client statistics
         client_stats = self.client_stat_store.list_by_experiment(
-            str(experiment["_id"]),
-            use_typing=True
+            str(experiment["_id"]), use_typing=True
         )["result"]
 
         if use_typing:

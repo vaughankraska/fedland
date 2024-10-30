@@ -25,7 +25,7 @@ def test_create_experiment(experiment_store: ExperimentStore) -> None:
             "class_frequencies": {"class_0": 0.4, "class_1": 0.3},
             "gini_index": 0.6,
         },
-        local_rounds=[]
+        local_rounds=[],
     )
 
     # Create experiment with client statistics
@@ -37,7 +37,7 @@ def test_create_experiment(experiment_store: ExperimentStore) -> None:
         timestamp=datetime.now().isoformat(),
         active_clients=1,
         learning_rate=0.1,
-        client_stats=[client_stat]  # insert client stats as pleased
+        client_stats=[client_stat],  # insert client stats as pleased
     )
 
     experiment_id: str = experiment_store.create_experiment(experiment)

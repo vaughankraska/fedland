@@ -33,7 +33,6 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         time.sleep(5)
         latest_experiment = experiment_store.get_latest()
 
-
     training, testing = load_dataset(latest_experiment.dataset_name)
     api_host = os.environ.get("FEDN_SERVER_HOST", "api-server")
     api_port = os.environ.get("FEDN_SERVER_PORT", 8092)
@@ -44,11 +43,17 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
     # The client's name should be set to the hostname (which is the hash
     # from the docker container).
     this_clients_name = socket.gethostname()
-    client_index = next((
-        index for index, client in enumerate(clients["result"])
-        if client["name"] == this_clients_name
-        ), None)
-    print(f"[*] Client {this_clients_name} loading partition {client_index + 1}/{clients_count}")
+    client_index = next(
+        (
+            index
+            for index, client in enumerate(clients["result"])
+            if client["name"] == this_clients_name
+        ),
+        None,
+    )
+    print(
+        f"[*] Client {this_clients_name} loading partition {client_index + 1}/{clients_count}"
+    )
     assert (
         client_index is not None
     ), "Client name couldnt be found in the server's clients"
@@ -70,14 +75,14 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
 
     # Dont overwrite local rounds if they exist
     existing_stats = experiment_store.client_stat_store.get(
-            experiment_id=latest_experiment.id, client_index=client_index, use_typing=True
-            )
+        experiment_id=latest_experiment.id, client_index=client_index, use_typing=True
+    )
     client_stat = ClientStat(
         experiment_id=latest_experiment.id,
         client_index=client_index,
         data_indices=train_loader.partition_indices,
         balance=calculate_class_balance(train_loader),
-        local_rounds=existing_stats.local_rounds if existing_stats else []
+        local_rounds=existing_stats.local_rounds if existing_stats else [],
     )
     succ = experiment_store.client_stat_store.create_or_update(client_stat)
     print(f"[*] ClientStat Added or Updated? {succ}")

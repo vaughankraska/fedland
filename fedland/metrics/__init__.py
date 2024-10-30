@@ -126,16 +126,14 @@ def calculate_class_balance(dataloader: DataLoader) -> Dict[str, Any]:
     class_counts = Counter(all_labels)
     total_samples = len(all_labels)
     class_frequencies = {
-            f"class_{cls}": count / total_samples
-            for cls, count in class_counts.items()
-            }
+        f"class_{cls}": count / total_samples for cls, count in class_counts.items()
+    }
 
     # Calculate Gini index
     gini_index = gini(class_counts.values())
 
     return {
-        "class_counts": {f"class_{cls}": count
-                         for cls, count in class_counts.items()},
+        "class_counts": {f"class_{cls}": count for cls, count in class_counts.items()},
         "class_frequencies": class_frequencies,
         "gini_index": gini_index,
     }

@@ -96,10 +96,13 @@ def _gradtensor_to_npvec(net, include_bn=False):
     def filter_function(p):
         return include_bn or len(p.data.size()) > 1
 
-    return np.concatenate([
-        p.grad.data.cpu().numpy().ravel()
-        for p in net.parameters() if filter_function(p)
-        ])
+    return np.concatenate(
+        [
+            p.grad.data.cpu().numpy().ravel()
+            for p in net.parameters()
+            if filter_function(p)
+        ]
+    )
 
 
 def _eval_hess_vec_prod(vec, params, net, criterion, data_loader, device):

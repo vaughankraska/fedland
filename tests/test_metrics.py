@@ -17,10 +17,9 @@ def test_class_balance(dataset: Dataset):
     loader = DataLoader(dataset=dataset)
     class_balances = calculate_class_balance(loader)
 
-    assert class_balances.get('class_counts'), 'class_counts key missing'
-    assert class_balances.get('class_frequencies'), (
-            'class_frequencies key missing')
-    assert class_balances.get('gini_index'), 'gini_index key missing'
+    assert class_balances.get("class_counts"), "class_counts key missing"
+    assert class_balances.get("class_frequencies"), "class_frequencies key missing"
+    assert class_balances.get("gini_index"), "gini_index key missing"
     gini = class_balances.get("gini_index")
     assert gini > 0.0 and gini < 1.0
 
@@ -34,12 +33,11 @@ def test_frobenius_norm_shape(model, dummy_data, criterion, device):
 
 def test_hessian_eigs_shape(model, dummy_data, criterion, device):
     eigenvalues, eigenvectors = hessian_eigs(
-            model, dummy_data, criterion, device, num_max=3
-            )
+        model, dummy_data, criterion, device, num_max=3
+    )
 
     # Check shapes
-    num_params = sum(p.numel()for p in model.parameters()
-                     if len(p.shape) != 1)
+    num_params = sum(p.numel() for p in model.parameters() if len(p.shape) != 1)
     assert len(eigenvalues) == 3
     assert eigenvectors.shape == (num_params, 3)
 
@@ -103,7 +101,9 @@ def test_hessian_eigs_positive_semidefinite(model, dummy_data, criterion, device
 
 @pytest.mark.parametrize("num_max", [1, 3, 5])
 def test_hessian_eigs_num_max(model, dummy_data, criterion, device, num_max):
-    eigenvalues, eigenvectors = hessian_eigs(model, dummy_data, criterion, device, num_max=num_max)
+    eigenvalues, eigenvectors = hessian_eigs(
+        model, dummy_data, criterion, device, num_max=num_max
+    )
     assert len(eigenvalues) == num_max
     assert eigenvectors.shape[1] == num_max
 
@@ -128,12 +128,12 @@ def test_frobenius_norm_zero_for_constant_function(device):
 def test_input_validation():
     with pytest.raises(Exception):
         # Test with invalid num_max
-        _npvec_to_tensorlist(np.zeros(100), [], torch.device('cpu'))
+        _npvec_to_tensorlist(np.zeros(100), [], torch.device("cpu"))
 
     with pytest.raises(AssertionError):
         # Test with mismatched vector size
         params = [torch.randn(2, 3)]
-        _npvec_to_tensorlist(np.zeros(10), params, torch.device('cpu'))
+        _npvec_to_tensorlist(np.zeros(10), params, torch.device("cpu"))
 
 
 @pytest.mark.xfail(reason="Unimplemented")
@@ -144,4 +144,6 @@ def test_pac_bayes(dataset: Dataset):
 @pytest.mark.xfail(reason="Unimplemented")
 def test_frobenius(dataset: Dataset):
     assert False, "TODO"
+
+
 # end AI generated test>>>

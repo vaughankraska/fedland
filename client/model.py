@@ -16,6 +16,7 @@ def compile_model():
     :rtype: torch.nn.Module
     """
 
+    # TODO: handle different models for different datasets
     return FedNet()
 
 

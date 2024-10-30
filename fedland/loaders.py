@@ -36,13 +36,12 @@ class SubsetWeightedRandomSampler(Sampler[int]):
     """
 
     def __init__(
-            self,
-            weights: torch.Tensor,
-            num_samples: int,
-            indices: Sequence[int],
-            generator=None
-            ) -> None:
-
+        self,
+        weights: torch.Tensor,
+        num_samples: int,
+        indices: Sequence[int],
+        generator=None,
+    ) -> None:
         self.weights = weights
         self.num_samples = num_samples
         self.indices = indices
@@ -50,8 +49,7 @@ class SubsetWeightedRandomSampler(Sampler[int]):
 
     def __iter__(self) -> Iterator[int]:
         rand_tensor = torch.multinomial(
-            self.weights, self.num_samples,
-            replacement=True, generator=self.generator
+            self.weights, self.num_samples, replacement=True, generator=self.generator
         )
         for idx in rand_tensor:
             yield self.indices[idx]
@@ -73,26 +71,23 @@ class PartitionedDataLoader(DataLoader):
         **kwargs,
     ):
         if partition_index >= num_partitions:
-            raise ValueError(
-                    "partition_index cannot be greater than num_partitions"
-                    )
+            raise ValueError("partition_index cannot be greater than num_partitions")
 
         if num_partitions <= 0:
             raise ValueError("num_partitions must be non-zero and postive")
 
         labels = np.array([dataset[i][1] for i in range(len(dataset))])
         uni_labels = np.unique(labels)
-        if target_balance_ratios is not None and \
-                len(target_balance_ratios) != len(uni_labels):
+        if target_balance_ratios is not None and len(target_balance_ratios) != len(
+            uni_labels
+        ):
             raise ValueError(
-                    f"target_balance_ratios (len {len(target_balance_ratios)})"
-                    f" must match dataset labels len({len(uni_labels)})"
-                    )
+                f"target_balance_ratios (len {len(target_balance_ratios)})"
+                f" must match dataset labels len({len(uni_labels)})"
+            )
 
         if subset_fraction > 1 or subset_fraction < 0:
-            raise ValueError(
-                    f"subset_fraction={subset_fraction} must be > 0 and <= 1"
-                    )
+            raise ValueError(f"subset_fraction={subset_fraction} must be > 0 and <= 1")
 
         # Defaults for consistency
         generator = torch.Generator().manual_seed(FIXED_SEED)
@@ -110,10 +105,10 @@ class PartitionedDataLoader(DataLoader):
         start_idx = partition_index * partition_size
         end_idx = start_idx + partition_size
         self.partition_indices = np.random.choice(
-                indices[start_idx:end_idx],
-                int(partition_size * subset_fraction),
-                replace=False,
-                )
+            indices[start_idx:end_idx],
+            int(partition_size * subset_fraction),
+            replace=False,
+        )
         partition_labels = labels[self.partition_indices]
 
         if target_balance_ratios is None:
@@ -123,8 +118,8 @@ class PartitionedDataLoader(DataLoader):
         else:
             # Sample the specified target ratios (assumes classes)
             current_class_counts = np.bincount(
-                    partition_labels, minlength=len(uni_labels)
-                    )
+                partition_labels, minlength=len(uni_labels)
+            )
             current_class_ratios = current_class_counts / len(partition_labels)
 
             # Calculate weights for each class
@@ -136,11 +131,11 @@ class PartitionedDataLoader(DataLoader):
 
             weights = torch.from_numpy(weights).float()
             sampler = SubsetWeightedRandomSampler(
-                    indices=self.partition_indices,
-                    weights=weights,
-                    num_samples=partition_size,
-                    generator=generator,
-                    )
+                indices=self.partition_indices,
+                weights=weights,
+                num_samples=partition_size,
+                generator=generator,
+            )
 
         super().__init__(
             dataset=dataset,
