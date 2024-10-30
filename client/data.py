@@ -38,8 +38,8 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
     api_host = os.environ.get("FEDN_SERVER_HOST", "api-server")
     api_port = os.environ.get("FEDN_SERVER_PORT", 8092)
     api = APIClient(api_host, api_port)
-    clients = api.get_clients()
-    clients_count = api.get_active_clients()
+    clients = api.get_active_clients()
+    clients_count = clients.get("count")
 
     # The client's name should be set to the hostname (which is the hash
     # from the docker container).
@@ -68,12 +68,16 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         shuffle=False,
     )
 
+    # Dont overwrite local rounds if they exist
+    existing_stats = experiment_store.client_stat_store.get(
+            experiment_id=latest_experiment.id, client_index=client_index, use_typing=True
+            )
     client_stat = ClientStat(
         experiment_id=latest_experiment.id,
         client_index=client_index,
         data_indices=train_loader.partition_indices,
         balance=calculate_class_balance(train_loader),
-        local_rounds=[]
+        local_rounds=existing_stats.local_rounds if existing_stats else []
     )
     succ = experiment_store.client_stat_store.create_or_update(client_stat)
     print(f"[*] ClientStat Added or Updated? {succ}")
@@ -82,7 +86,9 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
 
 
 if __name__ == "__main__":
-    print("[*] data.py")
-    # Prepare data if not already done
-    # if not os.path.exists(abs_path + "/data"):
-    #     load_mnist_data()
+    print("[*] __main__ data.py")
+    # Prepare data if not already done (assume latest experiment dataset)
+    latest_experiment = experiment_store.get_latest()
+    if latest_experiment is not None:
+        print(f"[*] Preloading dataset {latest_experiment.dataset_name}")
+        load_dataset(latest_experiment.dataset_name)

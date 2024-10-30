@@ -1,11 +1,9 @@
 network_id: fedn-network
-discover_host: api-server
-discover_port: 8092
 
-name: combiner
-host: combiner
-port: 12080
-max_clients: 30
+controller:
+  host: api-server
+  port: 8092
+  debug: True
 
 statestore:
   type: MongoDB

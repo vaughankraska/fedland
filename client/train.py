@@ -3,10 +3,11 @@ import sys
 import socket
 import torch
 import torch.optim as optim
+from datetime import datetime
 from fedn import APIClient
 from fedn.utils.helpers.helpers import save_metadata
 from fedn.network.api.v1.session_routes import session_store
-from fedland.metrics import evaluate_all
+from fedland.metrics import path_norm, pac_bayes_bound
 from fedland.database_models.experiment import experiment_store
 from model import load_parameters, save_parameters
 from data import load_data
@@ -59,18 +60,27 @@ def train(
         for index, client in enumerate(clients["result"])
         if client["name"] == this_clients_name
         ), None,)
+
     session_id = session_store.list(limit=1, skip=0, sort_key="session_id")
-    experiment_id = experiment_store.get_latest()
+    experiment = experiment_store.get_latest()
+    experiment_id = experiment.id if experiment else None
 
     # Load data
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    train_loader, _ = load_data(data_path, batch_size=batch_size)
+    train_loader, test_loader = load_data(data_path, batch_size=batch_size)
 
     # Load parmeters and initialize model
     model = load_parameters(in_model_path).to(device)
-    print(f"[*] Model: {model}")
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+
+    print(f"[*] Model: {model}\n")
+    print(f"[*] Device: {device}")
+    print(f"[*] Criterion: {criterion}")
+    print(f"[*] Epochs: {epochs}")
+    print(f"[*] Batch Size: {batch_size}")
+    print(f"[*] session_id: {session_id}")
+    print(f"[*] client_index: {client_index}")
 
     # Train
     for epoch in range(epochs):
@@ -91,36 +101,40 @@ def train(
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
 
-            if i % 200 == 199:
-                try:
-                    stats = evaluate_all(model, train_loader, criterion, device)
-                    pn = stats.get("path_norm")
-                    pb = stats.get("pac_bayes")
-                    fn = stats.get("frobenius_norm")
-                    print(
-                        f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
-                        f"Loss: {running_loss/100:.3f}, Accuracy: {100.*correct/total:.2f}%,\n"  # noqa E501
-                        f"PathNorm: {pn:.4f}\n"
-                        f"PacBayesBound: {pb}\n"
-                        f"Frobenius: {fn}\n"
-                    )
-                    running_loss, correct, total = 0.0, 0, 0
-                    new_local_round = {
-                        "session_id": session_id,
-                        "epoch": epoch,
-                        "loss": running_loss,
-                        "path_norm": pn,
-                        "pac_bayes_bound": pb,
-                        "frobenius_norm": fn,
-                    }
-                    # TODO: fix dump to mongo
-                    experiment_store.client_stat_store.append_local_round(
-                        experiment_id=experiment_id,
-                        client_index=client_index,
-                        local_round=new_local_round
-                    )
-                except Exception as e:
-                    print(f"[!!!] Error: {e}")
+        # Do reporting each local epoch
+        train_accuracy = 100.*correct/total
+        print(f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
+              f"Train Loss: {running_loss:.3f}, Train Accuracy: {train_accuracy:.2f}%,\n"  # noqa E501
+              )
+        try:
+            pn = path_norm(model, train_loader)
+            pb = 0.0  # TODO
+            fn = 0.0  # TODO implement faster (too slow)
+            print(
+                f"PathNorm: {pn:.4f}\n"
+                f"PacBayesBound: {pb}\n"
+                f"Frobenius: {fn}\n"
+            )
+            running_loss, correct, total = 0.0, 0, 0
+            new_local_round = {
+                "session_id": session_id,
+                "epoch": epoch,
+                "train_loss": running_loss,
+                "train_accuracy": train_accuracy,
+                "path_norm": pn,
+                "pac_bayes_bound": pb,
+                "frobenius_norm": fn,
+                "timestamp": datetime.now().isoformat(),
+            }
+            # TODO: fix dump to mongo
+            did_insert = experiment_store.client_stat_store.append_local_round(
+                experiment_id=experiment_id,
+                client_index=client_index,
+                local_round=new_local_round
+            )
+            print(f"[*] Appended Stats? {did_insert}")
+        except Exception as e:
+            print(f"[!!!] Error in stats: {e}")
 
     # Metadata needed for aggregation server side
     metadata = {

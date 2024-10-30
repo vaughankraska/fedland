@@ -1,7 +1,34 @@
 from typing import Any, Dict, List, Self
 import pymongo
+import numpy as np
+import torch
 from pymongo.database import Database
 from fedn.network.storage.statestore.stores.store import Store
+
+
+def _convert_foreign_types(obj: Any) -> Any:
+    """
+    Convert numpy and torch objects for mongo.
+    """
+
+    # Torch objects
+    if torch.is_tensor(obj):
+        if obj.numel() == 1:
+            return obj.item()
+        return obj.detach().cpu().numpy().tolist()
+
+    # Numpy objects
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: _convert_foreign_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [_convert_foreign_types(item) for item in obj]
+    return obj
 
 
 class ClientStat:
@@ -75,25 +102,26 @@ class ClientStatStore(Store[ClientStat]):
     def create_or_update(self, client_data: ClientStat) -> bool:
         """
         Creates or updates client data in the database.
-
         Args:
             client_data (ClientStat): The client data to create/update
-
         Returns:
             bool: True if operation was successful
         """
         try:
+            # Convert the dictionary and handle numpy types
+            client_dict = _convert_foreign_types(client_data.to_dict())
+
             self.database[self.collection].update_one(
                     {
                         "experiment_id": client_data.experiment_id,
                         "client_index": client_data.client_index
                         },
-                    {"$set": client_data.to_dict()},
+                    {"$set": client_dict},
                     upsert=True
                     )
             return True
         except Exception as e:
-            print(f"Error updating client data: {e}")
+            print(f"[!] Error updating client data: {e}")
             return False
 
     def append_local_round(
@@ -114,6 +142,7 @@ class ClientStatStore(Store[ClientStat]):
             bool: True if update was successful
         """
         try:
+            local_round = _convert_foreign_types(local_round)
             result = self.database[self.collection].update_one(
                     {
                         "experiment_id": experiment_id,
@@ -123,7 +152,7 @@ class ClientStatStore(Store[ClientStat]):
                     )
             return result.modified_count > 0
         except Exception as e:
-            print(f"Error appending local round: {e}")
+            print(f"[!] Error appending local round: {e}")
             return False
 
     def list_by_experiment(

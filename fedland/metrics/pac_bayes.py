@@ -106,7 +106,7 @@ def pac_bayes_bound(
         est_acc = acc / M2
         dev = abs(model_accuracy - est_acc)
         if dev < 1e-4 or sigma_max - sigma_min < 1e-4:
-            print(model_accuracy, est_acc, sigma_max, sigma_min)
+
             return sigma_new
         if dev > d:
             sigma_max = sigma_new

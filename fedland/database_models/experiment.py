@@ -88,7 +88,6 @@ class ExperimentStore(Store[Experiment]):
             print(f"[!] Error creating Experiment {result}")
             return None
 
-        print(result)
         created_exp = Experiment.from_dict(result)
 
         # Create client stats if they exist
@@ -121,7 +120,6 @@ class ExperimentStore(Store[Experiment]):
     def get_latest(self) -> Optional[Experiment]:
         """Get latest experiment, if any"""
         experiments = self.list(limit=1, skip=0, sort_key="timestamp")
-        print(experiments)
 
         if experiments.get("count", 0) == 0:
             return None

@@ -98,8 +98,9 @@ services:
       - GET_HOSTS_FROM=dns
       - FEDN_PACKAGE_EXTRACT_DIR=package
       - STATESTORE_CONFIG=/workspace/settings-state.yaml
+      - MODELSTORAGE_CONFIG=/workspace/settings-state.yaml
     deploy:
-      replicas: 2
+      replicas: 0
       restart_policy:
         condition: on-failure
         delay: 7s

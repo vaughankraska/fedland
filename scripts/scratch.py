@@ -5,8 +5,8 @@ from fedland.database_models.experiment import experiment_store, Experiment
 def create_test_experiment():
     experiment = Experiment(
         id="",
-        description="Testy Experiment 1",
-        dataset_name="MNIST",
+        description="Testy Experiment 1 CIFAR",
+        dataset_name="CIFAR",
         model="FedNet",
         timestamp=datetime.now().isoformat(),
         active_clients=3,

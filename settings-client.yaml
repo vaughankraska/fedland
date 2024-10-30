@@ -1,6 +1,8 @@
-discover_host: "api-server"
+network_id: fedn-network
+
+discover_host: api-server
 discover_port: 8092
 lr: 0.01
 batch_size: 64
-local_epochs: 5
+local_epochs: 2
 num_workers: 1

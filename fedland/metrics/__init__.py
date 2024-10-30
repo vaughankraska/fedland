@@ -31,28 +31,37 @@ def evaluate_all(
 
     in_size, _ = next(iter(data_loader))
 
-    p_norm = path_norm(model, data_loader)
+    try:
+        p_norm = path_norm(model, data_loader)
+    except Exception as e:
+        print(f"[!] Error calculating path norm: {e}")
 
-    bayes = pac_bayes_bound(
-        model=model,
-        data_loader=data_loader,
-        criterion=criterion,
-        device=device,
-        d=0.1,
-        sigma_max=0.5,
-        sigma_min=0.001,
-        M1=30,
-        M2=10,
-        M3=20,
-    )
+    try:
+        bayes = pac_bayes_bound(
+            model=model,
+            data_loader=data_loader,
+            criterion=criterion,
+            device=device,
+            d=0.1,
+            sigma_max=0.5,
+            sigma_min=0.001,
+            M1=30,
+            M2=10,
+            M3=20,
+        )
+    except Exception as e:
+        print(f"[!] Error calculating pac bayes bound: {e}")
 
-    frobenius = frobenius_norm(
-        model=model,
-        data_loader=data_loader,
-        criterion=criterion,
-        device=device,
-        num_max=10,
-    )
+    try:
+        frobenius = frobenius_norm(
+            model=model,
+            data_loader=data_loader,
+            criterion=criterion,
+            device=device,
+            num_max=10,
+        )
+    except Exception as e:
+        print(f"[!] Error Calculating frob norm: {e}")
 
     return {
         "avg_loss": avg_loss,

@@ -41,7 +41,6 @@ def test_create_experiment(experiment_store: ExperimentStore) -> None:
     )
 
     experiment_id: str = experiment_store.create_experiment(experiment)
-    print(experiment_id)
     latest_experiment = experiment_store.get_latest()
     created_experiment = experiment_store.get(experiment_id)
 
