@@ -51,18 +51,30 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         ),
         None,
     )
-    print(
-        f"[*] Client {this_clients_name} loading partition {client_index + 1}/{clients_count}"
-    )
-    assert (
-        client_index is not None
-    ), "Client name couldnt be found in the server's clients"
+    print(f"[*] Client {this_clients_name} loading partition {client_index + 1}/{clients_count}")
+    assert (client_index is not None), "Client name couldnt be found in the server's clients"
+
+    # Set balance ratios and subset fractions if they exist
+    target_balance_ratios = (
+            latest_experiment.target_balance_ratios[client_index]
+            if latest_experiment.target_balance_ratios
+            and len(latest_experiment.target_balance_ratios) > client_index
+            else None
+            )
+    subset_fraction = (
+            latest_experiment.subset_fractions[client_index]
+            if latest_experiment.subset_fractions
+            and len(latest_experiment.subset_fractions) > client_index
+            else 1
+            )
 
     train_loader = PartitionedDataLoader(
         training,
         num_partitions=clients_count,
         partition_index=client_index,
         batch_size=batch_size,
+        target_balance_ratios=target_balance_ratios,
+        subset_fraction=subset_fraction,
         shuffle=False,
     )
     test_loader = PartitionedDataLoader(
@@ -70,6 +82,8 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         num_partitions=clients_count,
         partition_index=client_index,
         batch_size=batch_size,
+        target_balance_ratios=target_balance_ratios,
+        subset_fraction=subset_fraction,
         shuffle=False,
     )
 

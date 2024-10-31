@@ -64,7 +64,8 @@ def train(
         None,
     )
 
-    session_id = session_store.list(limit=1, skip=0, sort_key="session_id")
+    session = session_store.list(limit=1, skip=0, sort_key="session_id")
+    session_id = session.get("result")[0]["session_id"]
     experiment = experiment_store.get_latest()
     experiment_id = experiment.id if experiment else None
 
@@ -106,21 +107,38 @@ def train(
 
         # Do reporting each local epoch
         train_accuracy = 100.0 * correct / total
-        print(
-            f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
-            f"Train Loss: {running_loss:.3f}, Train Accuracy: {train_accuracy:.2f}%,\n"  # noqa E501
-        )
+        train_loss = running_loss / len(train_loader)
+        model.eval()
+        test_running_loss, test_correct, test_total = 0.0, 0, 0
+        with torch.no_grad():
+            for test_data in test_loader:
+                test_inputs = test_data[0].to(device)
+                test_labels = test_data[1].to(device)
+                test_outputs = model(test_inputs)
+                test_loss = criterion(test_outputs, test_labels)
+                test_running_loss += test_loss.item()
+                _, predicted = test_outputs.max(1)
+                test_total += test_labels.size(0)
+                test_correct += predicted.eq(test_labels).sum().item()
+        # Calculate test metrics
+        test_accuracy = 100.0 * test_correct / test_total
+        test_loss = test_running_loss / len(test_loader)
+        print(f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
+              f"Train Loss: {running_loss:.3f}, Train Accuracy: {train_accuracy:.2f}%,\n"  # noqa E501
+              f"Test Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.2f}%\n"  # noqa E501
+              )
         try:
             pn = path_norm(model, train_loader)
             pb = 0.0  # TODO
             fn = 0.0  # TODO implement faster (too slow)
-            print(f"PathNorm: {pn:.4f}\n" f"PacBayesBound: {pb}\n" f"Frobenius: {fn}\n")
-            running_loss, correct, total = 0.0, 0, 0
+            print(f"PathNorm: {pn:.4f}\n" f"PacBayesBound: {pb}\n" f"Frobenius: {fn}\n")  # noqa E501
             new_local_round = {
                 "session_id": session_id,
                 "epoch": epoch,
-                "train_loss": running_loss,
+                "train_loss": train_loss,
                 "train_accuracy": train_accuracy,
+                "test_loss": test_loss,
+                "test_accuracy": test_accuracy,
                 "path_norm": pn,
                 "pac_bayes_bound": pb,
                 "frobenius_norm": fn,
@@ -132,7 +150,7 @@ def train(
                 client_index=client_index,
                 local_round=new_local_round,
             )
-            print(f"[*] Appended Stats? {did_insert}")
+            print(f"[*] Appended Stats? {did_insert} for {experiment_id}")
         except Exception as e:
             print(f"[!!!] Error in stats: {e}")
 

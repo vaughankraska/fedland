@@ -4,35 +4,55 @@ import time
 import tarfile
 from datetime import datetime
 from fedn import APIClient
+from fedland.loaders import DatasetIdentifier
+from fedland.database_models.experiment import experiment_store, Experiment
 
 
 # CONSTANTS
-ROUNDS = 100
-HELPER = "numpyhelper"
-AGGREGATOR = "fedavg"
-
-session_config = {
-    "helper": "numpyhelper",
-    "id": "todo",  # "sesh-" + datetime.now().strftime("%Y%m%d%M"),
-    "aggregator": "fedavg",
-    "rounds": 100,
-    "validate": False,
-    "min_clients": "todo",  # clients get scaled in docker (manual)
-}
-# TODO: init, experiments from here, add clients/rounds from each client (inspo GridSearchCV)
+ROUNDS = 30
+CLIENT_LEVEL = 3
+LEARNING_RATE = 0.1  # (default in Experiment)
 EXPERIMENTS = [
-    {
-        "description": "Experiment 1",
-        "dataset_name": "MNIST",
-        "model": "CNN",
-        "timestamp": datetime.now(),
-        "active_clients": 0,
-        "learning_rate": 0.01,
-        "target_balance_ratios": None,
-        "subset_fractions": None,
-        "client_stats": None,
-    }
-]
+        Experiment(
+            id="",
+            description='Three Clients, Explicit Balance Ratios.',
+            dataset_name=DatasetIdentifier.MNIST.value,
+            model="FedNet",
+            timestamp=datetime.now().isoformat(),
+            target_balance_ratios=[
+                [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                ],
+            client_stats=[],
+            ),
+        Experiment(
+            id="",
+            description='Three Clients, one client even classes, second client not (pareto-like classes), third with only two classes.',
+            dataset_name=DatasetIdentifier.MNIST.value,
+            model="FedNet",
+            timestamp=datetime.now().isoformat(),
+            target_balance_ratios=[
+                [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                [0.5, 0.25, 0.125, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.8, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                ],
+            client_stats=[],
+            ),
+        Experiment(
+            id="",
+            description="Three Clients, offsetting classes ie 1-3, the second has 3-6, third has rest.",
+            dataset_name=DatasetIdentifier.MNIST.value,
+            model="FedNet",
+            timestamp=datetime.now().isoformat(),
+            target_balance_ratios=[
+                [0.33, 0.33, 0.34, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.00, 0.00, 0.00, 0.33, 0.33, 0.34, 0.0, 0.0, 0.0, 0.0],
+                [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.25, 0.25, 0.25, 0.25],
+                ],
+            client_stats=[],
+            ),
+        ]
 
 
 def create_cmd(name="package.tgz") -> str:
@@ -68,18 +88,54 @@ def setup(api: APIClient) -> dict:
 
 
 if __name__ == "__main__":
-    date_str = datetime.now().strftime("%Y%m%d%H%M")
-    sesh_id = f"sesh-{date_str}"
     api = APIClient(
         "localhost",
         8092,
         secure=False,
     )
     # Set package and seed
-    setup(api)
-    session = api.start_session(sesh_id, min_clients=2)
-    while not session["success"]:
-        print(f"=X Waiting to start run ({session['message']})")
-        time.sleep(4)
-        session = api.start_session(sesh_id, min_clients=2)
-    print(f"=>Started Federated Run:\n{session}")
+    # setup(api)
+    # time.sleep(5)
+
+    # def get_user_confirmation():
+    #     while True:
+    #         response = input("\n[y]/n Continue with next experiment? ").lower().strip()
+    #         if response in ['', 'y']:
+    #             return True
+    #         elif response == 'n':
+    #             return False
+    #         print("Please enter 'y' or 'n' (or press Enter for yes)")
+
+    for experiment in EXPERIMENTS:
+        # Set package and seed
+        setup(api)
+        time.sleep(5)
+
+        experiment.timestamp = datetime.now().isoformat()
+        exp_id = experiment_store.create_experiment(experiment)
+        assert exp_id is not None, "Cannot start Experiment without Experiment"
+
+        time.sleep(5)
+
+        # if not get_user_confirmation():
+        #     print("Stopping experiments.")
+        #     break
+
+        date_str = datetime.now().strftime("%Y%m%d%H%M")
+        sesh_id = f"sesh-{date_str}"
+        sesh_config = {
+                "id": sesh_id,
+                "min_clients": CLIENT_LEVEL,
+                "rounds": ROUNDS,
+                }
+        session = api.start_session(**sesh_config)
+        while not session["success"]:
+            print(f"=X Waiting to start run ({session['message']})")
+            time.sleep(4)
+            session = api.start_session(**sesh_config)
+        print(f"=>Started Federated Session:\n{session}")
+        print(f"=>Experiment:\n{experiment.description}\nid:{exp_id}")
+        while not api.session_is_finished(sesh_id):
+            status = api.get_session_status(sesh_id)
+            print(f"[*] Status: {status}")
+            time.sleep(35)

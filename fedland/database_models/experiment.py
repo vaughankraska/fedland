@@ -15,7 +15,6 @@ class Experiment:
         dataset_name: str,
         model: str,
         timestamp: str,
-        active_clients: int = 0,
         learning_rate: float = 0.1,
         target_balance_ratios: List[List[float]] = None,
         subset_fractions: List[float] = None,
@@ -26,7 +25,6 @@ class Experiment:
         self.dataset_name = dataset_name
         self.model = model
         self.timestamp = timestamp
-        self.active_clients = active_clients
         self.learning_rate = learning_rate
         self.target_balance_ratios = target_balance_ratios
         self.subset_fractions = subset_fractions
@@ -38,7 +36,6 @@ class Experiment:
             "dataset_name": self.dataset_name,
             "model": self.model,
             "timestamp": self.timestamp,
-            "active_clients": self.active_clients,
             "learning_rate": self.learning_rate,
             "target_balance_ratios": self.target_balance_ratios,
             "subset_fractions": self.subset_fractions,
@@ -57,7 +54,6 @@ class Experiment:
             dataset_name=data.get("dataset_name"),
             model=data.get("model"),
             timestamp=data.get("timestamp"),
-            active_clients=data.get("active_clients", 0),
             learning_rate=data.get("learning_rate", 0.1),
             target_balance_ratios=data.get("target_balance_ratios", None),
             subset_fractions=data.get("subset_fractions", None),

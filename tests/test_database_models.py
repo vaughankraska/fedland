@@ -35,7 +35,6 @@ def test_create_experiment(experiment_store: ExperimentStore) -> None:
         dataset_name="MNIST",
         model="FedNet",
         timestamp=datetime.now().isoformat(),
-        active_clients=1,
         learning_rate=0.1,
         client_stats=[client_stat],  # insert client stats as pleased
     )
