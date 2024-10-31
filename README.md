@@ -84,3 +84,13 @@ The default db is the same as the network id (fedn-network)
 mongosh "mongodb://0.0.0.0:6534/?authSource=admin" --apiVersion 1 --username fedn_admin
 ```
 The db can also be viewed using [Mongo Express webapp here](http://localhost:8081/db/fedn-network/)
+
+Backup/Restore the database inside the docker container with:
+[Backup File Here 10/31 _Spooky_](https://drive.google.com/file/d/127J3TzYofcE0dxDgYN9Yzes0HptyxMMx/view?usp=drive_link)
+```bash
+# backup
+mongodump -d fedn-network -u fedn_admin -p password --port=6534 --out=/data/db/backup
+# restore
+mongorestore /data/backup
+```
+* Note that from within the proj dir, we have the shared volume mounted to ./data 
