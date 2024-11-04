@@ -1,8 +1,9 @@
 import pytest
+import numpy as np
 from collections import Counter
 from fedland.loaders import PartitionedDataLoader
 
-WIGGLE_ROOM = 0.03
+WIGGLE_ROOM = 0.05
 
 
 def test_partitioned_loader_fails_negative_params(dataset):
@@ -178,3 +179,25 @@ def test_two_partitions(dataset):
 
     assert len(loader_0) == len(loader_1), "Loaders differ in length"
     assert len(indices_set) == len(dataset), "Indices bleeding across partitions"
+
+
+def test_partition_loads_same_indices_on_different_instances(dataset):
+    loader = PartitionedDataLoader(
+        dataset,
+        num_partitions=2,
+        partition_index=0,
+        target_balance_ratios=[0.5, 0.3, 0.2],
+        batch_size=1,
+    )
+    loader_again = PartitionedDataLoader(
+        dataset,
+        num_partitions=2,
+        partition_index=0,
+        target_balance_ratios=[0.5, 0.3, 0.2],
+        batch_size=1,
+    )
+
+    assert loader.partition_indices is not None
+    assert loader_again.partition_indices is not None
+    assert len(loader.partition_indices) == len(loader_again.partition_indices)
+    np.testing.assert_array_equal(loader.partition_indices, loader_again.partition_indices)

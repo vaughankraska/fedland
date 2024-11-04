@@ -87,11 +87,10 @@ class PartitionedDataLoader(DataLoader):
         if subset_fraction > 1 or subset_fraction < 0:
             raise ValueError(f"subset_fraction={subset_fraction} must be > 0 and <= 1")
 
-
         self.num_partitions = num_partitions
         self.target_balance_ratios = target_balance_ratios
 
-        # Fix rng seed since we want reproducibility.
+        # Fix rng seed since we want reproducibility in data partitions
         rng = np.random.default_rng(FIXED_SEED)
         indices = np.arange(len(dataset))
         rng.shuffle(indices)
@@ -100,7 +99,7 @@ class PartitionedDataLoader(DataLoader):
         partition_size = len(dataset) // num_partitions
         start_idx = partition_index * partition_size
         end_idx = start_idx + partition_size
-        self.partition_indices = np.random.choice(
+        self.partition_indices = rng.choice(
             indices[start_idx:end_idx],
             int(partition_size * subset_fraction),
             replace=False,

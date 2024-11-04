@@ -15,13 +15,13 @@ LEARNING_RATE = 0.1  # (default in Experiment)
 EXPERIMENTS = [
         Experiment(
             id="",
-            description='TESTING NON SEEDS, uneven classes',
+            description='TESTING NON SEEDS, even classes, fixed issue with rng seed',
             dataset_name=DatasetIdentifier.MNIST.value,
             model="FedNet",
             timestamp=datetime.now().isoformat(),
             target_balance_ratios=[
                 [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
-                [0.5, 0.25, 0.125, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
                 ],
             client_stats=[],
             ),

@@ -5,7 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 from typing import Dict, List
 from torch.utils.data import DataLoader
-from fedland.loaders import load_mnist_data
+from fedland.loaders import load_mnist_data, PartitionedDataLoader
+import torchvision
 from fedland.networks import FedNet
 from fedland.metrics import evaluate, path_norm
 
@@ -103,7 +104,23 @@ if __name__ == "__main__":
     learning_rate = 0.1
     momentum = 0.5
 
-    train_loader, test_loader = load_mnist_data()
+    # train_loader, test_loader = load_mnist_data()
+
+    OUT_DIR = "./temp"
+    train_set = torchvision.datasets.MNIST(
+        root=f"{OUT_DIR}/train",
+        transform=torchvision.transforms.ToTensor(),
+        train=True,
+        download=True,
+    )
+    train_loader = PartitionedDataLoader(train_set, num_partitions=1, partition_index=0)
+    test_set = torchvision.datasets.MNIST(
+        root=f"{OUT_DIR}/test",
+        transform=torchvision.transforms.ToTensor(),
+        train=False,
+        download=True,
+    )
+    test_loader = PartitionedDataLoader(test_set, num_partitions=1, partition_index=0)
     # Counterintuitive that we are running FedNet in centralized setting
     # but welp, I like the name.
     model: nn.Module = FedNet()
