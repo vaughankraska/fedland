@@ -25,32 +25,6 @@ EXPERIMENTS = [
                 ],
             client_stats=[],
             ),
-        # Experiment(
-        #     id="",
-        #     description='Three Clients, one client even classes, second client not (pareto-like classes), third with only two classes.',
-        #     dataset_name=DatasetIdentifier.MNIST.value,
-        #     model="FedNet",
-        #     timestamp=datetime.now().isoformat(),
-        #     target_balance_ratios=[
-        #         [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
-        #         [0.5, 0.25, 0.125, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        #         [0.8, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        #         ],
-        #     client_stats=[],
-        #     ),
-        # Experiment(
-        #     id="",
-        #     description="Three Clients, offsetting classes ie 1-3, the second has 3-6, third has rest.",
-        #     dataset_name=DatasetIdentifier.MNIST.value,
-        #     model="FedNet",
-        #     timestamp=datetime.now().isoformat(),
-        #     target_balance_ratios=[
-        #         [0.33, 0.33, 0.34, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        #         [0.00, 0.00, 0.00, 0.33, 0.33, 0.34, 0.0, 0.0, 0.0, 0.0],
-        #         [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.25, 0.25, 0.25, 0.25],
-        #         ],
-        #     client_stats=[],
-        #     ),
         ]
 
 
