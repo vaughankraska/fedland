@@ -15,8 +15,6 @@ from torch.utils.data import (
 
 OUT_DIR = "./data"
 FIXED_SEED = 42
-np.random.seed(FIXED_SEED)
-
 
 class DatasetIdentifier(Enum):
     CIFAR = "CIFAR"
@@ -89,8 +87,6 @@ class PartitionedDataLoader(DataLoader):
         if subset_fraction > 1 or subset_fraction < 0:
             raise ValueError(f"subset_fraction={subset_fraction} must be > 0 and <= 1")
 
-        # Defaults for consistency
-        generator = torch.Generator().manual_seed(FIXED_SEED)
 
         self.num_partitions = num_partitions
         self.target_balance_ratios = target_balance_ratios
@@ -113,7 +109,7 @@ class PartitionedDataLoader(DataLoader):
 
         if target_balance_ratios is None:
             sampler = SubsetRandomSampler(
-                indices=self.partition_indices, generator=generator
+                indices=self.partition_indices
             )
         else:
             # Sample the specified target ratios (assumes classes)
@@ -134,13 +130,11 @@ class PartitionedDataLoader(DataLoader):
                 indices=self.partition_indices,
                 weights=weights,
                 num_samples=partition_size,
-                generator=generator,
             )
 
         super().__init__(
             dataset=dataset,
             batch_size=batch_size,
-            generator=generator,
             sampler=sampler,
             *args,
             **kwargs,
@@ -154,7 +148,6 @@ def load_cifar_data() -> tuple[Dataset, Dataset]:
     returns:
         Tuple[Dataset, Dataset]: Tuple of training and testing Datasets
     """
-    torch.manual_seed(FIXED_SEED)
     if not os.path.exists(OUT_DIR):
         os.mkdir(OUT_DIR)
 
@@ -181,7 +174,6 @@ def load_mnist_data() -> tuple[Dataset, Dataset]:
     returns:
         Tuple[Dataset, Dataset]: Tuple of training and testing Datasets
     """
-    torch.manual_seed(FIXED_SEED)
     if not os.path.exists(OUT_DIR):
         os.mkdir(OUT_DIR)
 
