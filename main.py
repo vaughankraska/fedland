@@ -11,20 +11,16 @@ from fedland.database_models.experiment import experiment_store, Experiment
 
 
 # CONSTANTS
-ROUNDS = 10
+ROUNDS = 5
 CLIENT_LEVEL = 2
 LEARNING_RATE = 0.1  # (default in Experiment)
 EXPERIMENTS = [
         Experiment(
             id="",
-            description='TESTING CIFAR, even classes',
-            dataset_name=DatasetIdentifier.CIFAR.value,
-            model="CifarFedNet",
+            description='TESTING CIFAR-100, even classes',
+            dataset_name=DatasetIdentifier.CIFAR100.value,
+            model="CifarFedNet-100",
             timestamp=datetime.now().isoformat(),
-            target_balance_ratios=[
-                [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
-                [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-                ],
             client_stats=[],
             ),
         ]

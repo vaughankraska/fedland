@@ -129,9 +129,7 @@ def train(
               )
         try:
             pn = path_norm(model, train_loader)
-            pb = 0.0  # TODO
-            fn = 0.0  # TODO implement faster (too slow)
-            print(f"PathNorm: {pn:.4f}\n" f"PacBayesBound: {pb}\n" f"Frobenius: {fn}\n")  # noqa E501
+            print(f"PathNorm: {pn:.4f}\n")  # noqa E501
             new_local_round = {
                 "session_id": session_id,
                 "epoch": epoch,
@@ -140,8 +138,8 @@ def train(
                 "test_loss": test_loss,
                 "test_accuracy": test_accuracy,
                 "path_norm": pn,
-                "pac_bayes_bound": pb,
-                "frobenius_norm": fn,
+                "pac_bayes_bound": 0.0,  # no implementing but have code expecting it
+                "frobenius_norm": 0.0,
                 "timestamp": datetime.now().isoformat(),
             }
             # TODO: fix dump to mongo

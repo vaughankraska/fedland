@@ -8,6 +8,24 @@ from fedn.network.api.v1.shared import mdb
 
 
 class Experiment:
+    """
+    Database Model for an experiment - stores configuration parameters and results.
+
+    Args:
+        id (str): unique id.
+        description (str): Detailed description of the experiment's purpose and setup.
+        dataset_name (str): Value of DatasetIdentifier
+        model (str): "FedNet" | "CifarFedNet" | "CifarFedNet-100"
+        timestamp (str): Timestamp for creation.
+        learning_rate (float, optional): Unimplemented!
+        target_balance_ratios (List[List[float]], optional): Target ratios for balancing data
+            across different classes. Each inner list represents balance ratios for a client.
+        subset_fractions (List[float], optional): List of fractions indicating how data should
+            be split into partitions. Each fraction represents the size of a subset relative to
+            the whole dataset.
+        client_stats (List[ClientStat], optional): List of ClientStat objects containing
+            statistics for different clients participating in the experiment.
+    """
     def __init__(
         self,
         id: str,

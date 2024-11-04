@@ -16,8 +16,10 @@ from torch.utils.data import (
 OUT_DIR = "./data"
 FIXED_SEED = 42
 
+
 class DatasetIdentifier(Enum):
     CIFAR = "CIFAR"
+    CIFAR100 = "CIFAR-100"
     MNIST = "MNIST"
 
 
@@ -166,6 +168,32 @@ def load_cifar_data() -> tuple[Dataset, Dataset]:
     return train_set, test_set
 
 
+def load_cifar_100_data() -> tuple[Dataset, Dataset]:
+    """
+    Loads the CIFAR10 Dataset using the built in torchvision data loaders.
+
+    returns:
+        Tuple[Dataset, Dataset]: Tuple of training and testing Datasets
+    """
+    if not os.path.exists(OUT_DIR):
+        os.mkdir(OUT_DIR)
+
+    train_set = torchvision.datasets.CIFAR100(
+        root=f"{OUT_DIR}/train",
+        transform=torchvision.transforms.ToTensor(),
+        train=True,
+        download=True,
+    )
+    test_set = torchvision.datasets.CIFAR100(
+        root=f"{OUT_DIR}/test",
+        transform=torchvision.transforms.ToTensor(),
+        train=False,
+        download=True,
+    )
+
+    return train_set, test_set
+
+
 def load_mnist_data() -> tuple[Dataset, Dataset]:
     """
     Loads the MNIST Dataset using the built in torchvision data loaders.
@@ -194,6 +222,7 @@ def load_mnist_data() -> tuple[Dataset, Dataset]:
 
 DATA_LOADER_MAP = {
     "CIFAR": load_cifar_data,
+    "CIFAR-100": load_cifar_100_data,
     "MNIST": load_mnist_data,
 }
 
