@@ -19,6 +19,7 @@ def compile_model(which_model):
     :rtype: torch.nn.Module
     """
 
+    # TODO also add cifar100 model
     if which_model == "CifarFedNet":
         return CifarFedNet()
     elif which_model == "Fednet":
