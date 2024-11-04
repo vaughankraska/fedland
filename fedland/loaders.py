@@ -109,9 +109,7 @@ class PartitionedDataLoader(DataLoader):
         partition_labels = labels[self.partition_indices]
 
         if target_balance_ratios is None:
-            sampler = SubsetRandomSampler(
-                indices=self.partition_indices
-            )
+            sampler = SubsetRandomSampler(indices=self.partition_indices)
         else:
             # Sample the specified target ratios (assumes classes)
             current_class_counts = np.bincount(

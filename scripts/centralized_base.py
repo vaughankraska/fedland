@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from typing import Dict, List
 from torch.utils.data import DataLoader
-from fedland.loaders import load_mnist_data, PartitionedDataLoader
+from fedland.loaders import PartitionedDataLoader
 import torchvision
 from fedland.networks import FedNet
 from fedland.metrics import evaluate, path_norm

@@ -123,10 +123,11 @@ def train(
         # Calculate test metrics
         test_accuracy = 100.0 * test_correct / test_total
         test_loss = test_running_loss / len(test_loader)
-        print(f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
-              f"Train Loss: {running_loss:.3f}, Train Accuracy: {train_accuracy:.2f}%,\n"  # noqa E501
-              f"Test Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.2f}%\n"  # noqa E501
-              )
+        print(
+            f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(train_loader)}],\n"  # noqa E501
+            f"Train Loss: {running_loss:.3f}, Train Accuracy: {train_accuracy:.2f}%,\n"  # noqa E501
+            f"Test Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.2f}%\n"  # noqa E501
+        )
         try:
             pn = path_norm(model, train_loader)
             print(f"PathNorm: {pn:.4f}\n")  # noqa E501

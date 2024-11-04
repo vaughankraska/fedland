@@ -200,4 +200,6 @@ def test_partition_loads_same_indices_on_different_instances(dataset):
     assert loader.partition_indices is not None
     assert loader_again.partition_indices is not None
     assert len(loader.partition_indices) == len(loader_again.partition_indices)
-    np.testing.assert_array_equal(loader.partition_indices, loader_again.partition_indices)
+    np.testing.assert_array_equal(
+        loader.partition_indices, loader_again.partition_indices
+    )

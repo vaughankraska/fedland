@@ -26,6 +26,7 @@ class Experiment:
         client_stats (List[ClientStat], optional): List of ClientStat objects containing
             statistics for different clients participating in the experiment.
     """
+
     def __init__(
         self,
         id: str,

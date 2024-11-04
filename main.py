@@ -15,15 +15,15 @@ ROUNDS = 5
 CLIENT_LEVEL = 2
 LEARNING_RATE = 0.1  # (default in Experiment)
 EXPERIMENTS = [
-        Experiment(
-            id="",
-            description='TESTING CIFAR-100, even classes',
-            dataset_name=DatasetIdentifier.CIFAR100.value,
-            model="CifarFedNet-100",
-            timestamp=datetime.now().isoformat(),
-            client_stats=[],
-            ),
-        ]
+    Experiment(
+        id="",
+        description="TESTING CIFAR-100, even classes",
+        dataset_name=DatasetIdentifier.CIFAR100.value,
+        model="CifarFedNet-100",
+        timestamp=datetime.now().isoformat(),
+        client_stats=[],
+    ),
+]
 
 
 def create_cmd(name="package.tgz") -> str:
@@ -57,7 +57,6 @@ def build_cmd(path="client/"):
 
 
 def setup(api: APIClient) -> dict:
-
     create_cmd()  # package.tgz (Recompile package)
     build_cmd()  # seed.npz (Reinit seed model)
     assert os.path.exists(
@@ -90,7 +89,6 @@ if __name__ == "__main__":
     #         print("Please enter 'y' or 'n' (or press Enter for yes)")
 
     for experiment in EXPERIMENTS:
-
         experiment.timestamp = datetime.now().isoformat()
         exp_id = experiment_store.create_experiment(experiment)
         assert exp_id is not None, "Cannot start Experiment without Experiment"
@@ -106,10 +104,10 @@ if __name__ == "__main__":
         date_str = datetime.now().strftime("%Y%m%d%H%M")
         sesh_id = f"sesh-{date_str}"
         sesh_config = {
-                "id": sesh_id,
-                "min_clients": CLIENT_LEVEL,
-                "rounds": ROUNDS,
-                }
+            "id": sesh_id,
+            "min_clients": CLIENT_LEVEL,
+            "rounds": ROUNDS,
+        }
         session = api.start_session(**sesh_config)
         while not session["success"]:
             print(f"=X Waiting to start run ({session['message']})")
