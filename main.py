@@ -2,6 +2,7 @@
 import os
 import time
 import tarfile
+import numpy as np
 from datetime import datetime
 from fedn import APIClient
 from fedn.cli.run_cmd import check_yaml_exists
@@ -11,16 +12,20 @@ from fedland.database_models.experiment import experiment_store, Experiment
 
 
 # CONSTANTS
-ROUNDS = 5
+ROUNDS = 30
 CLIENT_LEVEL = 2
 LEARNING_RATE = 0.1  # (default in Experiment)
 EXPERIMENTS = [
     Experiment(
         id="",
-        description="TESTING CIFAR-100, even classes",
+        description="CIFAR-100, uneven classes",
         dataset_name=DatasetIdentifier.CIFAR100.value,
         model="CifarFedNet-100",
         timestamp=datetime.now().isoformat(),
+        target_balance_ratios=[
+            [0.01] * 100,
+            [float(x) for x in (np.exp(-0.07 * np.arange(100)) / sum(np.exp(-0.07 * np.arange(100))))],
+            ],
         client_stats=[],
     ),
 ]

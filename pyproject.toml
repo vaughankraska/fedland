@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fedland"
-version = "0.1.2"
+version = "0.2.0"
 description = "Research Libary for Federated Learing Loss Landscapes"
 authors = ["Finn Vaughankraska"]
 license = "None"
