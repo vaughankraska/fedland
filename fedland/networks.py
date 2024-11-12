@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as fun
+from torchvision.models.resnet import ResNet, BasicBlock
 
 
 class FedNet(nn.Module):
@@ -64,3 +65,38 @@ class CifarFedNet(nn.Module):
         x = self.fc2(x)
 
         return x
+
+
+class CifarResNet(ResNet):
+    def __init__(
+        self,
+        layers=[1, 1, 1, 1],
+        num_classes=100,
+        channels=[64, 128, 256, 512]
+    ):
+        super().__init__(
+            block=BasicBlock,
+            layers=layers,
+            num_classes=num_classes
+        )
+        self.conv1 = nn.Conv2d(
+                3, 64, kernel_size=3, stride=1, padding=1, bias=False
+                )
+        self.maxpool = nn.Identity()
+        if channels != [64, 128, 256, 512]:
+            self.inplanes = channels[0]
+            self.layer1 = self._make_layer(
+                    BasicBlock, channels[0], layers[0]
+                    )
+            self.layer2 = self._make_layer(
+                    BasicBlock, channels[1], layers[1], stride=2
+                    )
+            self.layer3 = self._make_layer(
+                    BasicBlock, channels[2], layers[2], stride=2
+                    )
+            self.layer4 = self._make_layer(
+                    BasicBlock, channels[3], layers[3], stride=2
+                    )
+            self.fc = nn.Linear(
+                    channels[3] * BasicBlock.expansion, num_classes
+                    )

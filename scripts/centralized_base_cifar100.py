@@ -105,14 +105,14 @@ if __name__ == "__main__":
     # train_loader, test_loader = load_mnist_data()
 
     OUT_DIR = "./temp"
-    train_set = torchvision.datasets.CIFAR10(
+    train_set = torchvision.datasets.CIFAR100(
         root=f"{OUT_DIR}/train",
         transform=torchvision.transforms.ToTensor(),
         train=True,
         download=True,
     )
     train_loader = PartitionedDataLoader(train_set, num_partitions=1, partition_index=0)
-    test_set = torchvision.datasets.CIFAR10(
+    test_set = torchvision.datasets.CIFAR100(
         root=f"{OUT_DIR}/test",
         transform=torchvision.transforms.ToTensor(),
         train=False,
@@ -120,12 +120,12 @@ if __name__ == "__main__":
     )
     test_loader = PartitionedDataLoader(test_set, num_partitions=1, partition_index=0)
 
-    model: nn.Module = CifarResNet(num_classes=10)
+    model: nn.Module = CifarResNet(num_classes=100)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
 
     results = train(
         model, train_loader, test_loader, criterion, optimizer, device, epochs
     )
-    dump(results, "centalized_cifar_10_path_norm")
+    dump(results, "centralized_cifar100_path_norm")
     print("<== Training Finished")
