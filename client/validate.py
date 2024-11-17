@@ -22,14 +22,16 @@ def validate(in_model_path, out_json_path, data_path=None):
     :param data_path: The path to the data file.
     :type data_path: str
     """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # Load data
     train_loader, test_loader = load_data(data_path)
 
     # Load model
     model = load_parameters(in_model_path)
+    model = model.to(device)
     model.eval()
     criterion = torch.nn.CrossEntropyLoss()
-    device = torch.device("cpu")
+    
 
     train_loss, train_acc = evaluate(model, train_loader, criterion, device)  # noqa E501
     test_loss, test_acc = evaluate(model, test_loader, criterion, device)
