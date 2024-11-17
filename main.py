@@ -37,7 +37,7 @@ EXPERIMENTS = [
             ],
         ],
         client_stats=[],
-        aggregator="fedavg"  # OR "fedopt"
+        aggregator="fedavg",  # OR "fedopt"
     ),
 ]
 
@@ -117,11 +117,13 @@ class ClientManager:
 
     def start_client(self, client_number: str, experiment_id: str):
         env = os.environ.copy()
-        env.update({
+        env.update(
+            {
                 "RESULTS_DIR": f"{os.path.dirname(os.path.abspath(__file__))}/results",
                 "TEST_ID": f"{experiment_id}",
-                "CLIENT_ID": f"{client_number}"
-                })
+                "CLIENT_ID": f"{client_number}",
+            }
+        )
         process = subprocess.Popen(
             [
                 "fedn",
