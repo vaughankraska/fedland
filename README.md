@@ -32,6 +32,13 @@ project
 │ └ mnist.npz
 ├ fedland (module)
 │ └ __init__.py
+├ results
+│ ├ <experiment-id>
+│ | ├ <client-index>
+| |   ├ client.json
+| |   ├ validate.json
+│ |   └ training.json 
+│ └ experiments.json
 ├ README.md
 ├ pyproject.toml
 ├ scripts / notebooks
