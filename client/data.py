@@ -1,19 +1,17 @@
 import os
-import socket
-import time
+import json
 from typing import Tuple
 from fedn import APIClient
 from fedland.loaders import PartitionedDataLoader, load_dataset
+from fedland.database_models.experiment import Experiment
 from fedland.metrics import calculate_class_balance
-from fedland.database_models.client_stat import ClientStat
-from fedland.database_models.experiment import experiment_store
 from torch.utils.data import DataLoader
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 abs_path = os.path.abspath(dir_path)
 
 
-def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]:
+def load_data(client_data_path, batch_size=128) -> Tuple[PartitionedDataLoader, PartitionedDataLoader]:
     """Load data from disk.
 
     :param data_path: Path to data dir. ex) 'data/path/to'
@@ -27,32 +25,28 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         print("[*] Client Data path is None")
         client_data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/")
 
-    latest_experiment = experiment_store.get_latest()
-    while latest_experiment is None:
-        print("[*] Waiting for Experiment...")
-        time.sleep(5)
-        latest_experiment = experiment_store.get_latest()
+    experiment = get_experiment()
 
-    training, testing = load_dataset(latest_experiment.dataset_name)
-    api_host = os.environ.get("FEDN_SERVER_HOST", "api-server")
+    # Get active clients from server
+    training, testing = load_dataset(experiment.dataset_name)
+    api_host = os.environ.get("FEDN_SERVER_HOST", "localhost")
     api_port = os.environ.get("FEDN_SERVER_PORT", 8092)
     api = APIClient(api_host, api_port)
     clients = api.get_active_clients()
     clients_count = clients.get("count")
 
-    # The client's name should be set to the hostname (which is the hash
-    # from the docker container).
-    this_clients_name = socket.gethostname()
+    # The client's name should be set in the env
+    client_id = os.environ.get("CLIENT_ID")
     client_index = next(
         (
             index
             for index, client in enumerate(clients["result"])
-            if client["name"] == this_clients_name
+            if client["name"] == client_id
         ),
         None,
     )
     print(
-        f"[*] Client {this_clients_name} loading partition {client_index + 1}/{clients_count}"
+        f"[*] Client {client_id} loading partition {client_index + 1}/{clients_count}"
     )
     assert (
         client_index is not None
@@ -60,15 +54,15 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
 
     # Set balance ratios and subset fractions if they exist
     target_balance_ratios = (
-        latest_experiment.target_balance_ratios[client_index]
-        if latest_experiment.target_balance_ratios
-        and len(latest_experiment.target_balance_ratios) > client_index
+        experiment.target_balance_ratios[client_index]
+        if experiment.target_balance_ratios
+        and len(experiment.target_balance_ratios) > client_index
         else None
     )
     subset_fraction = (
-        latest_experiment.subset_fractions[client_index]
-        if latest_experiment.subset_fractions
-        and len(latest_experiment.subset_fractions) > client_index
+        experiment.subset_fractions[client_index]
+        if experiment.subset_fractions
+        and len(experiment.subset_fractions) > client_index
         else 1
     )
 
@@ -91,27 +85,42 @@ def load_data(client_data_path, batch_size=128) -> Tuple[DataLoader, DataLoader]
         shuffle=False,
     )
 
-    # Dont overwrite local rounds if they exist
-    existing_stats = experiment_store.client_stat_store.get(
-        experiment_id=latest_experiment.id, client_index=client_index, use_typing=True
-    )
-    client_stat = ClientStat(
-        experiment_id=latest_experiment.id,
-        client_index=client_index,
-        data_indices=train_loader.partition_indices,
-        balance=calculate_class_balance(train_loader),
-        local_rounds=existing_stats.local_rounds if existing_stats else [],
-    )
-    succ = experiment_store.client_stat_store.create_or_update(client_stat)
-    print(f"[*] ClientStat Added or Updated? {succ}")
+    client_info = {
+        "experiment_id": experiment.id,
+        "client_index": client_index,
+        "data_indices": train_loader.partition_indices.tolist(),
+        "balance": calculate_class_balance(train_loader),
+        "local_rounds": [],
+    }
+
+    results_dir = os.environ.get("RESULTS_DIR")
+    directory = f"{results_dir}/{experiment.id}/{client_id}"
+    filename = f"{directory}/client.json"
+    # Create all parent directories if they don't exist
+    os.makedirs(directory, exist_ok=True)
+    if not os.path.exists(filename):
+        with open(filename, "w") as f:
+            json.dump(client_info, f)
 
     return train_loader, test_loader
 
 
+def get_experiment():
+    results_dir = os.environ.get("RESULTS_DIR")
+    test_id = os.environ.get("TEST_ID")
+    target_experiment = None
+    with open(f"{results_dir}/experiments.json", "r") as f:
+        tests = json.load(f)
+        for t in tests:
+            if t["id"] == test_id:
+                target_experiment = Experiment(**t)
+    return target_experiment
+
+
 if __name__ == "__main__":
     print("[*] __main__ data.py")
-    # Prepare data if not already done (assume latest experiment dataset)
-    latest_experiment = experiment_store.get_latest()
-    if latest_experiment is not None:
-        print(f"[*] Preloading dataset {latest_experiment.dataset_name}")
-        load_dataset(latest_experiment.dataset_name)
+    target_experiment = get_experiment()
+    # Prepare data if not already done
+    if target_experiment is not None:
+        print(f"[*] Preloading dataset {target_experiment.dataset_name}")
+        load_dataset(target_experiment.dataset_name)

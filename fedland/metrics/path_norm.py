@@ -18,7 +18,7 @@ def path_norm(model: Module, data_loader: DataLoader) -> float:
             param.data = param.data**2
 
     ones = torch.ones_like(in_tensor)
-    summed = torch.sum(modified_model.forward(ones)).data
-    assert summed > 0, "Cannot square root a negative number in path"
+    summed = torch.sum(modified_model.forward(ones)).item()
+    assert summed > 0, "Cannot square root a negative number in path norm"
 
     return summed**0.5

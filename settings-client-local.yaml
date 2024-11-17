@@ -1,0 +1,13 @@
+network_id: fedn-network
+discover_host: localhost
+discover_port: 8092
+remote_compute_context: True
+force_ssl: False
+secure: False
+preshared_cert: False
+verify: False
+logfile: debug.log
+# preferred_combiner: localhost
+# combiner: localhost
+# combiner_port: 12080
+# proxy_server: http://localhost:12080

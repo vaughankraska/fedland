@@ -1,10 +1,9 @@
 import collections
 
 import torch
-
 from fedn.utils.helpers.helpers import get_helper
-from fedland.networks import FedNet, CifarFedNet
-from fedland.database_models.experiment import experiment_store
+from data import get_experiment
+from fedland.networks import FedNet, CifarResNet
 
 HELPER_MODULE = "numpyhelper"
 helper = get_helper(HELPER_MODULE)
@@ -20,10 +19,10 @@ def compile_model(which_model):
     """
 
     if which_model == "CifarFedNet":
-        return CifarFedNet()
+        return CifarResNet(num_classes=10)
     elif which_model == "CifarFedNet-100":
-        return CifarFedNet(num_classes=100)
-    elif which_model == "Fednet":
+        return CifarResNet(num_classes=100)
+    elif which_model == "FedNet":
         return FedNet()
     else:
         raise ValueError(f"Unknown Model Type '{which_model}', cannot compile")
@@ -49,7 +48,7 @@ def load_parameters(model_path) -> torch.nn.Module:
     :return: The loaded model.
     :rtype: torch.nn.Module
     """
-    latest_experiment = experiment_store.get_latest()
+    latest_experiment = get_experiment()
     model = compile_model(latest_experiment.model)
     parameters_np = helper.load(model_path)
 
@@ -74,6 +73,6 @@ def init_seed(out_path="seed.npz", which_model="FedNet"):
 
 if __name__ == "__main__":
     print("[*] __main__ model.py")
-    latest_experiment = experiment_store.get_latest()
+    latest_experiment = get_experiment()
     print(f"[*] Compiling model: {latest_experiment.model}")
     init_seed("../seed.npz", which_model=latest_experiment.model)

@@ -1,6 +1,6 @@
 import os
 import sys
-
+import json
 import torch
 from fedn.utils.helpers.helpers import save_metrics
 from model import load_parameters
@@ -42,6 +42,23 @@ def validate(in_model_path, out_json_path, data_path=None):
         "test_accuracy": float(test_acc),
         "path_norm": float(pnorm),
     }
+    client_id = os.environ.get("CLIENT_ID")
+    test_id = os.environ.get("TEST_ID")
+    results_dir = os.environ.get("RESULTS_DIR")
+    directory = f"{results_dir}/{test_id}/{client_id}"
+    filename = f"{directory}/validate.json"
+    if os.path.exists(filename):
+        with open(filename, "r+") as f:
+            existing_data = json.load(f)
+            if isinstance(existing_data, list):
+                existing_data.append(report)
+            else:
+                existing_data = [existing_data, report]
+            f.seek(0)
+            json.dump(existing_data, f, indent=4)
+    else:
+        with open(filename, "w") as f:
+            json.dump([report], f, indent=4)
 
     # Save JSON
     save_metrics(report, out_json_path)

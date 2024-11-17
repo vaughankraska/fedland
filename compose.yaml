@@ -91,50 +91,50 @@ services:
     depends_on:
       - api-server
 
-  client:
-    build:
-      context: .
-    environment:
-      - GET_HOSTS_FROM=dns
-      - FEDN_PACKAGE_EXTRACT_DIR=package
-      - STATESTORE_CONFIG=/workspace/settings-state.yaml
-      - MODELSTORAGE_CONFIG=/workspace/settings-state.yaml
-    deploy:
-      replicas: 0
-      restart_policy:
-        condition: on-failure
-        delay: 7s
-        max_attempts: 3
-        window: 30s
-    depends_on:
-      combiner:
-        condition: service_healthy
-    volumes:
-      - ./settings-client.yaml:/workspace/settings-client.yaml
-      - ./settings-state.yaml:/workspace/settings-state.yaml
-      - shared-data:/workspace/package/client/data
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /workspace
-          ignore:
-            - .git/
-            - "*.pyc"
-            - "*.tgz"
-            - "*.npz"
-            - "__pycache__"
-            - "data/"
-            - "tests/"
-            - "dist/"
-            - "results/"
-            - "scripts/"
-        - action: rebuild
-          path: Dockerfile
-        - action: rebuild
-          path: pyproject.toml
-        - action: rebuild
-          path: setup.py
+  # client:
+  #   build:
+  #     context: .
+  #   environment:
+  #     - GET_HOSTS_FROM=dns
+  #     - FEDN_PACKAGE_EXTRACT_DIR=package
+  #     - STATESTORE_CONFIG=/workspace/settings-state.yaml
+  #     - MODELSTORAGE_CONFIG=/workspace/settings-state.yaml
+  #   deploy:
+  #     replicas: 0
+  #     restart_policy:
+  #       condition: on-failure
+  #       delay: 7s
+  #       max_attempts: 3
+  #       window: 30s
+  #   depends_on:
+  #     combiner:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./settings-client.yaml:/workspace/settings-client.yaml
+  #     - ./settings-state.yaml:/workspace/settings-state.yaml
+  #     - shared-data:/workspace/package/client/data
+  #   develop:
+  #     watch:
+  #       - action: sync
+  #         path: .
+  #         target: /workspace
+  #         ignore:
+  #           - .git/
+  #           - "*.pyc"
+  #           - "*.tgz"
+  #           - "*.npz"
+  #           - "__pycache__"
+  #           - "data/"
+  #           - "tests/"
+  #           - "dist/"
+  #           - "results/"
+  #           - "scripts/"
+  #       - action: rebuild
+  #         path: Dockerfile
+  #       - action: rebuild
+  #         path: pyproject.toml
+  #       - action: rebuild
+  #         path: setup.py
 
 volumes:
   shared-data:

@@ -1,32 +1,43 @@
 # This file is an entry point to run all the experiments
 import os
+from typing import List
 import time
+import sys
 import tarfile
+import json
+import subprocess
+import signal
 import numpy as np
 from datetime import datetime
+import uuid
 from fedn import APIClient
 from fedn.cli.run_cmd import check_yaml_exists
 from fedn.utils.dispatcher import _read_yaml_file, Dispatcher
 from fedland.loaders import DatasetIdentifier
-from fedland.database_models.experiment import experiment_store, Experiment
+from fedland.database_models.experiment import Experiment
 
 
 # CONSTANTS
-ROUNDS = 30
+ROUNDS = 10
 CLIENT_LEVEL = 2
-LEARNING_RATE = 0.1  # (default in Experiment)
 EXPERIMENTS = [
     Experiment(
-        id="",
-        description="CIFAR-100, uneven classes",
-        dataset_name=DatasetIdentifier.CIFAR100.value,
-        model="CifarFedNet-100",
+        id=str(uuid.uuid4()),
+        description="EXAMPLE: CIFAR-10, uneven classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model="CifarFedNet",
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=[
-            [0.01] * 100,
-            [float(x) for x in (np.exp(-0.07 * np.arange(100)) / sum(np.exp(-0.07 * np.arange(100))))],
+            [0.01] * 10,
+            [
+                float(x)
+                for x in (
+                    np.exp(-0.07 * np.arange(10)) / sum(np.exp(-0.07 * np.arange(10)))
+                )
             ],
+        ],
         client_stats=[],
+        aggregator="fedavg"  # OR "fedopt"
     ),
 ]
 
@@ -61,7 +72,28 @@ def build_cmd(path="client/"):
     dispatcher.run_cmd("build")
 
 
-def setup(api: APIClient) -> dict:
+def create_experiment(experiment: Experiment):
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    filename = current_dir + "/results/experiments.json"
+    os.environ.setdefault("RESULTS_DIR", current_dir + "/results")
+
+    if os.path.exists(filename):
+        with open(filename, "r+") as f:
+            existing_data = json.load(f)
+            if isinstance(existing_data, list):
+                existing_data.append(experiment.to_dict())
+            else:
+                existing_data = [existing_data, experiment.to_dict()]
+            f.seek(0)
+            json.dump(existing_data, f, indent=2)
+    else:
+        with open(filename, "w") as f:
+            json.dump([experiment.to_dict()], f, indent=2)
+
+
+def setup(api: APIClient, experiment: Experiment) -> dict:
+    os.environ.setdefault("TEST_ID", experiment.id)
+    create_experiment(experiment)
     create_cmd()  # package.tgz (Recompile package)
     build_cmd()  # seed.npz (Reinit seed model)
     assert os.path.exists(
@@ -77,34 +109,76 @@ def setup(api: APIClient) -> dict:
     print(f"[*] {res.get('message')}")
 
 
+class ClientManager:
+    def __init__(self):
+        self.processes: List[subprocess.Popen] = []
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTERM, self.signal_handler)
+
+    def start_client(self, client_number: str, experiment_id: str):
+        env = os.environ.copy()
+        env.update({
+                "RESULTS_DIR": f"{os.path.dirname(os.path.abspath(__file__))}/results",
+                "TEST_ID": f"{experiment_id}",
+                "CLIENT_ID": f"{client_number}"
+                })
+        process = subprocess.Popen(
+            [
+                "fedn",
+                "client",
+                "start",
+                "-n",
+                client_number,
+                "--init",
+                "settings-client-local.yaml",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+        )
+        self.processes.append(process)
+
+    def start_multiple_clients(self, num_clients: int, experiment_id: str):
+        for i in range(num_clients):
+            self.start_client(str(i), experiment_id)
+            print(f"[*], Client {i} started")
+            time.sleep(1)
+
+    def signal_handler(self, signum, frame):
+        print("[*] Shutting down clients")
+        self.cleanup()
+        sys.exit(0)
+
+    def cleanup(self):
+        for process in self.processes:
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+        self.processes.clear()
+
+    def peak_processes(self):
+        try:
+            running = sum(1 for p in self.processes if p.poll() is None)
+            print(f"[*] Running {running} clients")
+        except KeyboardInterrupt:
+            self.cleanup()
+
+
 if __name__ == "__main__":
     api = APIClient(
         "localhost",
         8092,
         secure=False,
     )
-
-    # def get_user_confirmation():
-    #     while True:
-    #         response = input("\n[y]/n Continue with next experiment? ").lower().strip()
-    #         if response in ['', 'y']:
-    #             return True
-    #         elif response == 'n':
-    #             return False
-    #         print("Please enter 'y' or 'n' (or press Enter for yes)")
+    manager = ClientManager()
 
     for experiment in EXPERIMENTS:
         experiment.timestamp = datetime.now().isoformat()
-        exp_id = experiment_store.create_experiment(experiment)
-        assert exp_id is not None, "Cannot start Experiment without Experiment"
-
-        # Set package and seed
-        setup(api)
-        time.sleep(5)
-
-        # if not get_user_confirmation():
-        #     print("Stopping experiments.")
-        #     break
+        # Set package and seed and test in experiments.json
+        setup(api, experiment)
 
         date_str = datetime.now().strftime("%Y%m%d%H%M")
         sesh_id = f"sesh-{date_str}"
@@ -112,15 +186,21 @@ if __name__ == "__main__":
             "id": sesh_id,
             "min_clients": CLIENT_LEVEL,
             "rounds": ROUNDS,
+            "aggregator": experiment.aggregator,
+            "aggregator_kwargs": experiment.aggregator_kwargs,
         }
         session = api.start_session(**sesh_config)
+
+        manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
         while not session["success"]:
             print(f"=X Waiting to start run ({session['message']})")
+            manager.peak_processes()
             time.sleep(4)
             session = api.start_session(**sesh_config)
         print(f"=>Started Federated Session:\n{session}")
-        print(f"=>Experiment:\n{experiment.description}\nid:{exp_id}")
+        print(f"=>Experiment:\n{experiment.description}\nid:{experiment.id}")
         while not api.session_is_finished(sesh_id):
             status = api.get_session_status(sesh_id)
             print(f"[*] Status: {status}")
-            time.sleep(35)
+            time.sleep(60)
+        manager.cleanup()

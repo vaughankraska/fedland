@@ -1,14 +1,11 @@
 import os
 import sys
-import socket
 import torch
 import torch.optim as optim
+import json
 from datetime import datetime
-from fedn import APIClient
 from fedn.utils.helpers.helpers import save_metadata
-from fedn.network.api.v1.session_routes import session_store
 from fedland.metrics import path_norm
-from fedland.database_models.experiment import experiment_store
 from model import load_parameters, save_parameters
 from data import load_data
 
@@ -49,25 +46,10 @@ def train(
     :param momentum: The momentum rate to use.
     :type momentum: float
     """
-    # TODO: cleanup or find something better
-    api_host = os.environ.get("FEDN_SERVER_HOST", "api-server")
-    api_port = os.environ.get("FEDN_SERVER_PORT", 8092)
-    api = APIClient(api_host, api_port)
-    clients = api.get_clients()
-    this_clients_name = socket.gethostname()
-    client_index = next(
-        (
-            index
-            for index, client in enumerate(clients["result"])
-            if client["name"] == this_clients_name
-        ),
-        None,
-    )
-
-    session = session_store.list(limit=1, skip=0, sort_key="session_id")
-    session_id = session.get("result")[0]["session_id"]
-    experiment = experiment_store.get_latest()
-    experiment_id = experiment.id if experiment else None
+    client_id = os.environ.get("CLIENT_ID")
+    test_id = os.environ.get("TEST_ID")
+    if not client_id:
+        raise ValueError("CLIENT_ID and TEST_ID must exist in environment.")
 
     # Load data
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -78,13 +60,15 @@ def train(
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
+    global_path_norm = path_norm(model, train_loader)
+
     print(f"[*] Model: {model}\n")
     print(f"[*] Device: {device}")
     print(f"[*] Criterion: {criterion}")
     print(f"[*] Epochs: {epochs}")
     print(f"[*] Batch Size: {batch_size}")
-    print(f"[*] session_id: {session_id}")
-    print(f"[*] client_index: {client_index}")
+    print(f"[*] client_id: {client_id}")
+    print(f"[*] global path norm: {global_path_norm}")
 
     # Train
     for epoch in range(epochs):
@@ -128,35 +112,43 @@ def train(
             f"Train Loss: {running_loss:.3f}, Train Accuracy: {train_accuracy:.2f}%,\n"  # noqa E501
             f"Test Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.2f}%\n"  # noqa E501
         )
-        try:
-            pn = path_norm(model, train_loader)
-            print(f"PathNorm: {pn:.4f}\n")  # noqa E501
-            new_local_round = {
-                "session_id": session_id,
-                "epoch": epoch,
-                "train_loss": train_loss,
-                "train_accuracy": train_accuracy,
-                "test_loss": test_loss,
-                "test_accuracy": test_accuracy,
-                "path_norm": pn,
-                "pac_bayes_bound": 0.0,  # no implementing but have code expecting it
-                "frobenius_norm": 0.0,
-                "timestamp": datetime.now().isoformat(),
-            }
-            # TODO: fix dump to mongo
-            did_insert = experiment_store.client_stat_store.append_local_round(
-                experiment_id=experiment_id,
-                client_index=client_index,
-                local_round=new_local_round,
-            )
-            print(f"[*] Appended Stats? {did_insert} for {experiment_id}")
-        except Exception as e:
-            print(f"[!!!] Error in stats: {e}")
+        pn = path_norm(model, train_loader)
+        print(f"PathNorm: {pn:.4f}\n")  # noqa E501
+        new_epoch_results = {
+            "epoch": epoch,
+            "learning_rate": lr,
+            "batch_size": batch_size,
+            "len_train_indices": len(train_loader.partition_indices),
+            "len_test_indices": len(test_loader.partition_indices),
+            "momentum": momentum,
+            "train_loss": train_loss,
+            "train_accuracy": train_accuracy,
+            "test_loss": test_loss,
+            "test_accuracy": test_accuracy,
+            "path_norm": pn,
+            "global_path_norm": global_path_norm,
+            "timestamp": datetime.now().isoformat(),
+        }
+        results_dir = os.environ.get("RESULTS_DIR")
+        directory = f"{results_dir}/{test_id}/{client_id}"
+        filename = f"{directory}/training.json"
+        if os.path.exists(filename):
+            with open(filename, "r+") as f:
+                existing_data = json.load(f)
+                if isinstance(existing_data, list):
+                    existing_data.append(new_epoch_results)
+                else:
+                    existing_data = [existing_data, new_epoch_results]
+                f.seek(0)
+                json.dump(existing_data, f, indent=4)
+        else:
+            with open(filename, "w") as f:
+                json.dump([new_epoch_results], f, indent=4)
 
     # Metadata needed for aggregation server side
     metadata = {
         # num_examples are mandatory
-        "num_examples": len(train_loader.dataset),
+        "num_examples": len(train_loader.partition_indices),
         "batch_size": batch_size,
         "epochs": epochs,
         "lr": lr,

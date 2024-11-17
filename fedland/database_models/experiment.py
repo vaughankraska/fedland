@@ -1,4 +1,4 @@
-from typing import Dict, List, Self, Optional
+from typing import Dict, List, Self, Optional, Any
 from typing_extensions import override
 from pymongo.database import Database
 from bson import ObjectId
@@ -17,7 +17,6 @@ class Experiment:
         dataset_name (str): Value of DatasetIdentifier
         model (str): "FedNet" | "CifarFedNet" | "CifarFedNet-100"
         timestamp (str): Timestamp for creation.
-        learning_rate (float, optional): Unimplemented!
         target_balance_ratios (List[List[float]], optional): Target ratios for balancing data
             across different classes. Each inner list represents balance ratios for a client.
         subset_fractions (List[float], optional): List of fractions indicating how data should
@@ -25,6 +24,7 @@ class Experiment:
             the whole dataset.
         client_stats (List[ClientStat], optional): List of ClientStat objects containing
             statistics for different clients participating in the experiment.
+        aggregator (str): federated aggregator name
     """
 
     def __init__(
@@ -34,31 +34,44 @@ class Experiment:
         dataset_name: str,
         model: str,
         timestamp: str,
-        learning_rate: float = 0.1,
         target_balance_ratios: List[List[float]] = None,
         subset_fractions: List[float] = None,
         client_stats: List[ClientStat] = None,
+        aggregator: str = "fedavg",
+        aggregator_kwargs: Dict[str, Any] = {
+                    "serveropt": "adam",
+                    "learning_rate": 1e-2,
+                    "beta1": 0.9,
+                    "beta2": 0.99,
+                    "tau": 1e-4
+                    }
     ):
         self.id = id
         self.description = description
         self.dataset_name = dataset_name
         self.model = model
         self.timestamp = timestamp
-        self.learning_rate = learning_rate
         self.target_balance_ratios = target_balance_ratios
         self.subset_fractions = subset_fractions
         self.client_stats = client_stats or []
+        self.aggregator = aggregator
+        if self.aggregator == "fedopt":
+            self.aggregator_kwargs = aggreagtor_kwargs
+        else:
+            self.aggregator_kwargs = None
 
     def to_dict(self) -> Dict:
         return {
+            "id": self.id,
             "description": self.description,
             "dataset_name": self.dataset_name,
             "model": self.model,
             "timestamp": self.timestamp,
-            "learning_rate": self.learning_rate,
             "target_balance_ratios": self.target_balance_ratios,
             "subset_fractions": self.subset_fractions,
             "client_stats": [stat.to_dict() for stat in self.client_stats],
+            "aggregator": self.aggregator,
+            "aggregator_kwargs": self.aggregator_kwargs,
         }
 
     @classmethod
@@ -73,10 +86,11 @@ class Experiment:
             dataset_name=data.get("dataset_name"),
             model=data.get("model"),
             timestamp=data.get("timestamp"),
-            learning_rate=data.get("learning_rate", 0.1),
             target_balance_ratios=data.get("target_balance_ratios", None),
             subset_fractions=data.get("subset_fractions", None),
             client_stats=client_stats,
+            aggregator=data.get("aggregator"),
+            aggregator_kwargs=data.get("aggregator_kwargs"),
         )
 
 

@@ -77,9 +77,10 @@ def train(
     return results
 
 
-def dump(data: dict, base_filename: str):
+def dump(data: dict, base_filename: str, model: nn.Module):
     date_str = datetime.now().strftime("%Y%m%d")
     filename = f"results/{date_str}_{base_filename}.json"
+    data["model"] = model.__repr__()
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
 
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     # But paper says: "For ResNet with CIFAR10 to obtain good minima β = 0.5, b = 0.1 were used for 10 epochs."
 
     batch_size = 64
-    epochs = 10
+    epochs = 20
     learning_rate = 0.1
     momentum = 0.5
 
@@ -121,11 +122,12 @@ if __name__ == "__main__":
     test_loader = PartitionedDataLoader(test_set, num_partitions=1, partition_index=0)
 
     model: nn.Module = CifarResNet(num_classes=10)
+    # model: nn.Module = torchvision.models.resnet18(weights=None, num_classes=10)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
 
     results = train(
         model, train_loader, test_loader, criterion, optimizer, device, epochs
     )
-    dump(results, "centalized_cifar_10_path_norm")
+    dump(results, "centalized_cifar_10_path_norm", model)
     print("<== Training Finished")
