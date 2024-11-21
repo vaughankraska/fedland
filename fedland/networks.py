@@ -148,8 +148,8 @@ class CifarInception(nn.Module):
     def _create_network(self):
         # Reduced initial channels from 64 to 32
         self.input_net = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, padding=1), 
-            nn.BatchNorm2d(32), 
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
             nn.ReLU()
         )
 

@@ -18,24 +18,24 @@ from fedland.database_models.experiment import Experiment
 
 
 # CONSTANTS
-ROUNDS = 10
+ROUNDS = 30
 CLIENT_LEVEL = 2
 EXPERIMENTS = [
     Experiment(
         id=str(uuid.uuid4()),
-        description="EXAMPLE: CIFAR-10, uneven classes",
+        description="EXAMPLE: Inception CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model="CifarFedNet",
+        model="CifarInception",
         timestamp=datetime.now().isoformat(),
-        target_balance_ratios=[
-            [0.01] * 10,
-            [
-                float(x)
-                for x in (
-                    np.exp(-0.07 * np.arange(10)) / sum(np.exp(-0.07 * np.arange(10)))
-                )
-            ],
-        ],
+        # target_balance_ratios=[
+        #     [0.01] * 10,
+        #     [
+        #         float(x)
+        #         for x in (
+        #             np.exp(-0.07 * np.arange(10)) / sum(np.exp(-0.07 * np.arange(10)))
+        #         )
+        #     ],
+        # ],
         client_stats=[],
         aggregator="fedavg",  # OR "fedopt"
     ),
@@ -192,6 +192,7 @@ if __name__ == "__main__":
             "aggregator_kwargs": experiment.aggregator_kwargs,
         }
         session = api.start_session(**sesh_config)
+        time.sleep(5)
 
         manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
         while not session["success"]:

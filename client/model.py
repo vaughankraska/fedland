@@ -3,7 +3,7 @@ import collections
 import torch
 from fedn.utils.helpers.helpers import get_helper
 from data import get_experiment
-from fedland.networks import FedNet, CifarResNet
+from fedland.networks import FedNet, CifarResNet, CifarFedNet, CifarInception
 
 HELPER_MODULE = "numpyhelper"
 helper = get_helper(HELPER_MODULE)
@@ -19,9 +19,11 @@ def compile_model(which_model):
     """
 
     if which_model == "CifarFedNet":
+        return CifarFedNet(num_classes=10)
+    elif which_model == "CifarResNet":
         return CifarResNet(num_classes=10)
-    elif which_model == "CifarFedNet-100":
-        return CifarResNet(num_classes=100)
+    elif which_model == "CifarInception":
+        return CifarInception(num_classes=10)
     elif which_model == "FedNet":
         return FedNet()
     else:
