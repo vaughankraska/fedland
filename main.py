@@ -40,7 +40,11 @@ EXPERIMENTS = [
         ],
         subset_fractions=[1.0, 1.0], # control the amount of data each client gets
         client_stats=[],
+<<<<<<< HEAD
         aggregator="fedopt",  # OR "fedopt"
+=======
+        aggregator="fedavg",  # OR "fedopt"
+>>>>>>> 7de2dca7a6e8980380e7631b51104611d5fb75f3
     ),
 ]
 
