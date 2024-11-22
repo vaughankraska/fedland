@@ -39,12 +39,12 @@ class Experiment:
         client_stats: List[ClientStat] = None,
         aggregator: str = "fedavg",
         aggregator_kwargs: Dict[str, Any] = {
-                    "serveropt": "adam",
-                    "learning_rate": 1e-2,
-                    "beta1": 0.9,
-                    "beta2": 0.99,
-                    "tau": 1e-4
-                    }
+            "serveropt": "adam",
+            "learning_rate": 1e-2,
+            "beta1": 0.9,
+            "beta2": 0.99,
+            "tau": 1e-4,
+        },
     ):
         self.id = id
         self.description = description
@@ -56,7 +56,7 @@ class Experiment:
         self.client_stats = client_stats or []
         self.aggregator = aggregator
         if self.aggregator == "fedopt":
-            self.aggregator_kwargs = aggreagtor_kwargs
+            self.aggregator_kwargs = aggregator_kwargs
         else:
             self.aggregator_kwargs = None
 

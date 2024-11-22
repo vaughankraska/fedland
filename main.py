@@ -18,7 +18,7 @@ from fedland.database_models.experiment import Experiment
 
 
 # CONSTANTS
-ROUNDS = 10
+ROUNDS = 30
 CLIENT_LEVEL = 2
 EXPERIMENTS = [
     Experiment(
@@ -28,16 +28,19 @@ EXPERIMENTS = [
         model="CifarFedNet",
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=[
-            [0.01] * 10,
+            [0.01]*10,
+            #[0.01, 0.02, 0.03, 0.05, 0.07, 0.10, 0.20, 0.22, 0.20, 0.10], # [0.01]*10
             [
                 float(x)
                 for x in (
                     np.exp(-0.07 * np.arange(10)) / sum(np.exp(-0.07 * np.arange(10)))
                 )
             ],
+            
         ],
+        subset_fractions=[1.0, 1.0], # control the amount of data each client gets
         client_stats=[],
-        aggregator="fedavg"  # OR "fedopt"
+        aggregator="fedavg",  # OR "fedopt"
     ),
 ]
 
@@ -117,11 +120,13 @@ class ClientManager:
 
     def start_client(self, client_number: str, experiment_id: str):
         env = os.environ.copy()
-        env.update({
+        env.update(
+            {
                 "RESULTS_DIR": f"{os.path.dirname(os.path.abspath(__file__))}/results",
                 "TEST_ID": f"{experiment_id}",
-                "CLIENT_ID": f"{client_number}"
-                })
+                "CLIENT_ID": f"{client_number}",
+            }
+        )
         process = subprocess.Popen(
             [
                 "fedn",
@@ -142,7 +147,7 @@ class ClientManager:
         for i in range(num_clients):
             self.start_client(str(i), experiment_id)
             print(f"[*], Client {i} started")
-            time.sleep(1)
+            time.sleep(7) # Wait for client to start 1
 
     def signal_handler(self, signum, frame):
         print("[*] Shutting down clients")
@@ -154,7 +159,7 @@ class ClientManager:
             if process.poll() is None:
                 process.terminate()
                 try:
-                    process.wait(timeout=5)
+                    process.wait(timeout=5) 
                 except subprocess.TimeoutExpired:
                     process.kill()
         self.processes.clear()
@@ -173,7 +178,7 @@ if __name__ == "__main__":
         8092,
         secure=False,
     )
-    manager = ClientManager()
+    #manager = ClientManager()
 
     for experiment in EXPERIMENTS:
         experiment.timestamp = datetime.now().isoformat()
@@ -189,12 +194,12 @@ if __name__ == "__main__":
             "aggregator": experiment.aggregator,
             "aggregator_kwargs": experiment.aggregator_kwargs,
         }
-        session = api.start_session(**sesh_config)
-
-        manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
+        session = api.start_session(**sesh_config) 
+        #time.sleep(10) # Wait for session to start we can #
+        #manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
         while not session["success"]:
             print(f"=X Waiting to start run ({session['message']})")
-            manager.peak_processes()
+            #manager.peak_processes()
             time.sleep(4)
             session = api.start_session(**sesh_config)
         print(f"=>Started Federated Session:\n{session}")
@@ -203,4 +208,4 @@ if __name__ == "__main__":
             status = api.get_session_status(sesh_id)
             print(f"[*] Status: {status}")
             time.sleep(60)
-        manager.cleanup()
+        #manager.cleanup()

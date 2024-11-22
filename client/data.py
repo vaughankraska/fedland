@@ -5,13 +5,14 @@ from fedn import APIClient
 from fedland.loaders import PartitionedDataLoader, load_dataset
 from fedland.database_models.experiment import Experiment
 from fedland.metrics import calculate_class_balance
-from torch.utils.data import DataLoader
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 abs_path = os.path.abspath(dir_path)
 
 
-def load_data(client_data_path, batch_size=128) -> Tuple[PartitionedDataLoader, PartitionedDataLoader]:
+def load_data(
+    client_data_path, batch_size=64
+) -> Tuple[PartitionedDataLoader, PartitionedDataLoader]:
     """Load data from disk.
 
     :param data_path: Path to data dir. ex) 'data/path/to'

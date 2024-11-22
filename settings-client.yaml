@@ -4,5 +4,5 @@ discover_host: api-server
 discover_port: 8092
 lr: 0.01
 batch_size: 64
-local_epochs: 2
+local_epochs: 1 # 2
 num_workers: 1
