@@ -40,6 +40,35 @@ def test_partitioned_subset(dataset):
     assert len(loader) == int((len(dataset) // partitions) * fraction)
 
 
+def test_partitioned_subset_indices_len(dataset):
+    partitions = 4
+    fraction = 0.5
+    loader = PartitionedDataLoader(
+        dataset,
+        partitions,
+        0,
+        subset_fraction=fraction,
+        batch_size=1,
+    )
+
+    assert len(loader.partition_indices) == int((len(dataset) // partitions) * fraction)
+    assert len(loader.partition_indices) == len(loader)
+
+
+def test_partitioned_imbalanced(dataset):
+    partitions = 2
+    loader = PartitionedDataLoader(
+        dataset,
+        partitions,
+        0,
+        target_balance_ratios=[0.5, 0.3, 0.2],
+        batch_size=1,
+    )
+
+    assert len(loader.partition_indices) == int((len(dataset) // partitions))
+    assert len(loader) == len(loader.partition_indices)
+
+
 def test_partitioned_subset_and_imbalanced(dataset):
     partitions = 2
     fraction = 0.75
@@ -53,6 +82,69 @@ def test_partitioned_subset_and_imbalanced(dataset):
     )
 
     assert len(loader.partition_indices) == int((len(dataset) // partitions) * fraction)
+
+
+def test_partitioned_subsets_and_imbalanced_sums_to_data_len(dataset):
+    """
+    Total Data decreases if you have both
+    subset fraction and target balance set
+    TODO: Fix such that the data taken from one client is given
+    to another
+    """
+
+    partitions = 2
+    fractions = [0.50, 1]
+    loader_0 = PartitionedDataLoader(
+        dataset,
+        partitions,
+        0,
+        subset_fraction=fractions[0],
+        target_balance_ratios=[0.5, 0.3, 0.2],
+        batch_size=1,
+    )
+    loader_1 = PartitionedDataLoader(
+        dataset,
+        partitions,
+        0,
+        subset_fraction=fractions[1],
+        target_balance_ratios=[0.34, 0.33, 0.33],
+        batch_size=1,
+    )
+
+    assert sum([len(loader_1), len(loader_0)]) == len(dataset)
+    assert sum(
+        [len(loader_1.partition_indices), len(loader_0.partition_indices)]
+    ) == len(dataset)
+
+
+def test_partitioned_subsets_sums_to_data_len(dataset):
+    """
+    Total Data decreases if you have both
+    subset fraction and target balance set
+    TODO: Fix such that the data taken from one client is given
+    to another
+    """
+    partitions = 2
+    fractions = [0.50, 1]
+    loader_0 = PartitionedDataLoader(
+        dataset,
+        partitions,
+        0,
+        subset_fraction=fractions[0],
+        batch_size=1,
+    )
+    loader_1 = PartitionedDataLoader(
+        dataset,
+        partitions,
+        0,
+        subset_fraction=fractions[1],
+        batch_size=1,
+    )
+
+    assert sum([len(loader_1), len(loader_0)]) == len(dataset)
+    assert sum(
+        [len(loader_1.partition_indices), len(loader_0.partition_indices)]
+    ) == len(dataset)
 
 
 def test_partitioned_loader_with_target_ratios(dataset):

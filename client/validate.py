@@ -31,7 +31,6 @@ def validate(in_model_path, out_json_path, data_path=None):
     model = model.to(device)
     model.eval()
     criterion = torch.nn.CrossEntropyLoss()
-    
 
     train_loss, train_acc = evaluate(model, train_loader, criterion, device)  # noqa E501
     test_loss, test_acc = evaluate(model, test_loader, criterion, device)

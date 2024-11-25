@@ -3,13 +3,14 @@ import collections
 import torch
 from fedn.utils.helpers.helpers import get_helper
 from data import get_experiment
-from fedland.networks import FedNet, CifarResNet
+from fedland.networks import FedNet, CifarResNet, CifarFedNet, CifarInception
+from fedland.networks import ModelIdentifier
 
 HELPER_MODULE = "numpyhelper"
 helper = get_helper(HELPER_MODULE)
 
 
-def compile_model(which_model):
+def compile_model(which_model: str):
     """Compile the pytorch model.
 
     :param which_model: The model type to compile.
@@ -18,21 +19,27 @@ def compile_model(which_model):
     :rtype: torch.nn.Module
     """
 
-    if which_model == "CifarFedNet":
+    if which_model == ModelIdentifier.CIFAR_FEDNET.value:
+        return CifarFedNet(num_classes=10)
+    elif which_model == ModelIdentifier.CIFAR_RESNET.value:
         return CifarResNet(num_classes=10)
-    elif which_model == "CifarFedNet-100":
-        return CifarResNet(num_classes=100)
-    elif which_model == "FedNet":
+    elif which_model == ModelIdentifier.CIFAR_INCEPTION.value:
+        return CifarInception(num_classes=10)
+    elif which_model == ModelIdentifier.FEDNET.value:
         return FedNet()
     else:
         raise ValueError(f"Unknown Model Type '{which_model}', cannot compile")
 
-def init_weights(model):
-    """ Initialise a model with He initialisation and hard-coded bias 0.01
-    Reference taken from https://www.deeplearning.ai/ai-notes/initialization/index.html"""
+
+def init_weights(model: torch.nn.Module):
+    """
+    Initialise a model with He initialisation and hard-coded bias 0.01
+    Reference taken from https://www.deeplearning.ai/ai-notes/initialization/index.html
+    """
     if isinstance(model, torch.nn.Linear):
-        torch.nn.init.kaiming_uniform_(model.weight, mode = 'fan_in', nonlinearity = 'relu')
+        torch.nn.init.kaiming_uniform_(model.weight, mode="fan_in", nonlinearity="relu")
         model.bias.data.fill_(0.01)
+
 
 def save_parameters(model, out_path):
     """Save model paramters to file.
@@ -73,7 +80,7 @@ def init_seed(out_path="seed.npz", which_model="FedNet"):
     :type out_path: str
     """
     # Init and save
-    torch.manual_seed(2024) # Set the seed for repeatability
+    torch.manual_seed(2024)  # Set the seed for repeatability
     model = compile_model(which_model)
     model = model.apply(init_weights)
     save_parameters(model, out_path)

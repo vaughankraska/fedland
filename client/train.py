@@ -18,7 +18,7 @@ def train(
     out_model_path,
     data_path=None,
     batch_size=64,
-    epochs=3, # 5
+    epochs=1, # 5
     lr=0.01,
     momentum=0.5,
 ):
@@ -58,10 +58,10 @@ def train(
     # Load parmeters and initialize model
     model = load_parameters(in_model_path).to(device)
     criterion = torch.nn.CrossEntropyLoss()
-    #optimizer = optim.Adam(model.parameters(), lr=lr, momentum=momentum)
+    # optimizer = optim.Adam(model.parameters(), lr=lr, momentum=momentum)
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
-    model.eval() # Set model to eval mode
-    global_path_norm = path_norm(model, train_loader)#
+    model.eval()  # Set model to eval mode
+    global_path_norm = path_norm(model, train_loader)  #
     print(f"[*] Model: {model}\n")
     print(f"[*] Device: {device}")
     print(f"[*] Criterion: {criterion}")
