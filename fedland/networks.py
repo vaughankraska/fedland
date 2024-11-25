@@ -107,7 +107,7 @@ class InceptionBlock(nn.Module):
         self.conv_1x1 = nn.Sequential(
             nn.Conv2d(c_in, c_out["1x1"], kernel_size=1),
             nn.BatchNorm2d(c_out["1x1"]),
-            nn.ReLU()
+            nn.ReLU(),
         )
 
         # 3x3 convolution branch
@@ -146,6 +146,7 @@ class InceptionBlock(nn.Module):
         x_out = torch.cat([x_1x1, x_3x3, x_5x5, x_max], dim=1)
         return x_out
 
+
 class CifarInception(nn.Module):
     def __init__(self, num_classes=10, **kwargs):
         super().__init__()
@@ -156,9 +157,7 @@ class CifarInception(nn.Module):
     def _create_network(self):
         # Reduced initial channels from 64 to 32
         self.input_net = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU()
+            nn.Conv2d(3, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.ReLU()
         )
 
         self.inception_blocks = nn.Sequential(
@@ -174,7 +173,6 @@ class CifarInception(nn.Module):
                 c_out={"1x1": 12, "3x3": 24, "5x5": 6, "max": 6},
             ),
             nn.MaxPool2d(3, stride=2, padding=1),
-
             # Second block group - 16x16
             InceptionBlock(
                 48,
@@ -187,7 +185,6 @@ class CifarInception(nn.Module):
                 c_out={"1x1": 16, "3x3": 24, "5x5": 8, "max": 8},
             ),
             nn.MaxPool2d(3, stride=2, padding=1),  # 16x16 => 8x8
-
             # Final block group - 8x8
             InceptionBlock(
                 56,  # Total channels from previous block (16+24+8+8=56)
@@ -199,7 +196,7 @@ class CifarInception(nn.Module):
         self.output_net = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
-            nn.Linear(64, self.num_classes)  # 64 = 16+32+8+8 from last inception block
+            nn.Linear(64, self.num_classes),  # 64 = 16+32+8+8 from last inception block
         )
 
     def _init_params(self):
@@ -215,4 +212,3 @@ class CifarInception(nn.Module):
         x = self.inception_blocks(x)
         x = self.output_net(x)
         return x
-

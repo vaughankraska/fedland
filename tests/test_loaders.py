@@ -112,7 +112,9 @@ def test_partitioned_subsets_and_imbalanced_sums_to_data_len(dataset):
     )
 
     assert sum([len(loader_1), len(loader_0)]) == len(dataset)
-    assert sum([len(loader_1.partition_indices), len(loader_0.partition_indices)]) == len(dataset)
+    assert sum(
+        [len(loader_1.partition_indices), len(loader_0.partition_indices)]
+    ) == len(dataset)
 
 
 def test_partitioned_subsets_sums_to_data_len(dataset):
@@ -140,7 +142,9 @@ def test_partitioned_subsets_sums_to_data_len(dataset):
     )
 
     assert sum([len(loader_1), len(loader_0)]) == len(dataset)
-    assert sum([len(loader_1.partition_indices), len(loader_0.partition_indices)]) == len(dataset)
+    assert sum(
+        [len(loader_1.partition_indices), len(loader_0.partition_indices)]
+    ) == len(dataset)
 
 
 def test_partitioned_loader_with_target_ratios(dataset):

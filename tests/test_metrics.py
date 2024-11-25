@@ -17,7 +17,6 @@ def test_class_balance(dataset: Dataset):
 
 
 def test_path_norm_finn_with_paper(dataloader: DataLoader, model: Module):
-
     def lp_path_norm(model, device, p=2, input_size=[3, 32, 32]):
         tmp_model = copy.deepcopy(model)
         tmp_model.eval()
@@ -26,7 +25,7 @@ def test_path_norm_finn_with_paper(dataloader: DataLoader, model: Module):
                 if param.requires_grad:
                     param.abs_().pow_(p)
         data_ones = torch.ones(input_size).to(device)
-        return (tmp_model(data_ones).sum() ** (1 / p )).item()
+        return (tmp_model(data_ones).sum() ** (1 / p)).item()
 
     pn_finn = path_norm(model, dataloader)
     pn_paper = lp_path_norm(model, device="cpu", input_size=[10])

@@ -16,7 +16,7 @@ def path_norm(model: Module, data_loader: DataLoader) -> float:
 
     with torch.no_grad():
         for param in modified_model.parameters():
-            param.data = param.abs_().data**2
+            param.data = param.abs_().data ** 2
 
     ones = torch.ones_like(in_tensor)
     summed = torch.sum(modified_model.forward(ones)).item()

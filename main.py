@@ -37,7 +37,7 @@ EXPERIMENTS = [
                 )
             ],
         ],
-        subset_fractions=[1.0, 1.0], # control the amount of data each client gets
+        subset_fractions=[1.0, 1.0],  # control the amount of data each client gets
         client_stats=[],
         aggregator="fedavg",  # OR "fedopt"
     ),
@@ -146,7 +146,7 @@ class ClientManager:
         for i in range(num_clients):
             self.start_client(str(i), experiment_id)
             print(f"[*], Client {i} started")
-            time.sleep(7) # Wait for client to start 1
+            time.sleep(7)  # Wait for client to start 1
 
     def signal_handler(self, signum, frame):
         print("[*] Shutting down clients")
@@ -158,7 +158,7 @@ class ClientManager:
             if process.poll() is None:
                 process.terminate()
                 try:
-                    process.wait(timeout=5) 
+                    process.wait(timeout=5)
                 except subprocess.TimeoutExpired:
                     process.kill()
         self.processes.clear()
@@ -177,7 +177,7 @@ if __name__ == "__main__":
         8092,
         secure=False,
     )
-    #manager = ClientManager()
+    # manager = ClientManager()
 
     for experiment in EXPERIMENTS:
         experiment.timestamp = datetime.now().isoformat()

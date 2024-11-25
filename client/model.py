@@ -30,12 +30,16 @@ def compile_model(which_model: str):
     else:
         raise ValueError(f"Unknown Model Type '{which_model}', cannot compile")
 
-def init_weights(model):
-    """ Initialise a model with He initialisation and hard-coded bias 0.01
-    Reference taken from https://www.deeplearning.ai/ai-notes/initialization/index.html"""
+
+def init_weights(model: torch.nn.Module):
+    """
+    Initialise a model with He initialisation and hard-coded bias 0.01
+    Reference taken from https://www.deeplearning.ai/ai-notes/initialization/index.html
+    """
     if isinstance(model, torch.nn.Linear):
-        torch.nn.init.kaiming_uniform_(model.weight, mode = 'fan_in', nonlinearity = 'relu')
+        torch.nn.init.kaiming_uniform_(model.weight, mode="fan_in", nonlinearity="relu")
         model.bias.data.fill_(0.01)
+
 
 def save_parameters(model, out_path):
     """Save model paramters to file.
@@ -76,7 +80,7 @@ def init_seed(out_path="seed.npz", which_model="FedNet"):
     :type out_path: str
     """
     # Init and save
-    torch.manual_seed(2024) # Set the seed for repeatability
+    torch.manual_seed(2024)  # Set the seed for repeatability
     model = compile_model(which_model)
     model = model.apply(init_weights)
     save_parameters(model, out_path)
