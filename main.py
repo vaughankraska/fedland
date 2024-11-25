@@ -28,19 +28,13 @@ EXPERIMENTS = [
         model="CifarFedNet",
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=[
-            [0.01]*10,
-            #[0.01, 0.02, 0.03, 0.05, 0.07, 0.10, 0.20, 0.22, 0.20, 0.10], # [0.01]*10
-            [
-                float(x)
-                for x in (
-                    np.exp(-0.07 * np.arange(10)) / sum(np.exp(-0.07 * np.arange(10)))
-                )
-            ],
+            [0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
+            [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.0],
             
         ],
-        subset_fractions=[1.0, 1.0], # control the amount of data each client gets
+        subset_fractions=[1.0, 0.3], # control the amount of data each client gets
         client_stats=[],
-        aggregator="fedavg",  # OR "fedopt"
+        aggregator="fedopt",  # OR "fedopt" / "fedavg"
     ),
 ]
 
@@ -195,7 +189,7 @@ if __name__ == "__main__":
             "aggregator_kwargs": experiment.aggregator_kwargs,
         }
         session = api.start_session(**sesh_config) 
-        #time.sleep(10) # Wait for session to start we can #
+        time.sleep(10) # Wait for session to start we can #
         #manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
         while not session["success"]:
             print(f"=X Waiting to start run ({session['message']})")
