@@ -26,22 +26,22 @@ EXPERIMENTS = [
         id=str(uuid.uuid4()),
         description="EXAMPLE: ResNet CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
+        model=ModelIdentifier.CIFAR_INCEPTION.value,
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=[
             [0.01]*10,
+            [0.01]*10,
             #[0.01, 0.02, 0.03, 0.05, 0.07, 0.10, 0.20, 0.22, 0.20, 0.10], # [0.01]*10
-            [
-                float(x)
-                for x in (
-                    np.exp(-0.07 * np.arange(10)) / sum(np.exp(-0.07 * np.arange(10)))
-                )
-            ],
-            
+            # [
+            #     float(x)
+            #     for x in (
+            #         np.exp(-0.07 * np.arange(10)) / sum(np.exp(-0.07 * np.arange(10)))
+            #     )
+            # ],
         ],
         subset_fractions=[1.0, 1.0], # control the amount of data each client gets
         client_stats=[],
-        aggregator="fedopt",  # OR "fedopt" / "fedavg"
+        aggregator="fedavg",  # OR "fedopt" / "fedavg"
     ),
 ]
 
