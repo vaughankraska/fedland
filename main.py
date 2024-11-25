@@ -29,7 +29,7 @@ EXPERIMENTS = [
         model=ModelIdentifier.CIFAR_RESNET.value,
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=[
-            [0.01]*10,
+            [0.1] * 10,
             [
                 float(x)
                 for x in (
