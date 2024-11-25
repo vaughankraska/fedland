@@ -27,9 +27,9 @@ class MockDataset(VisionDataset):
 
 
 class SimpleNet(nn.Module):
-    def __init__(self):
+    def __init__(self, in_size=10):
         super().__init__()
-        self.fc1 = nn.Linear(2, 3)
+        self.fc1 = nn.Linear(in_size, 3)
         self.fc2 = nn.Linear(3, 1)
 
     def forward(self, x):
@@ -70,7 +70,7 @@ def dataset() -> Dataset:
 @pytest.fixture(scope="function")
 def dataloader() -> DataLoader:
     g = torch.Generator().manual_seed(42)
-    return DataLoader(dataset=dataset, shuffle=False, generator=g)
+    return DataLoader(dataset=MockDataset(), shuffle=False, generator=g)
 
 
 @pytest.fixture(scope="session")
