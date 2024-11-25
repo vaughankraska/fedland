@@ -2,6 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as fun
 from torchvision.models.resnet import ResNet, BasicBlock
+from enum import Enum
+
+
+class ModelIdentifier(Enum):
+    FEDNET = "FedNet"
+    CIFAR_FEDNET = "CifarFedNet"
+    CIFAR_RESNET = "CifarResNet"
+    CIFAR_INCEPTION = "CifarInception"
 
 
 class FedNet(nn.Module):
@@ -207,3 +215,4 @@ class CifarInception(nn.Module):
         x = self.inception_blocks(x)
         x = self.output_net(x)
         return x
+

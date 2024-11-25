@@ -4,12 +4,13 @@ import torch
 from fedn.utils.helpers.helpers import get_helper
 from data import get_experiment
 from fedland.networks import FedNet, CifarResNet, CifarFedNet, CifarInception
+from fedland.networks import ModelIdentifier
 
 HELPER_MODULE = "numpyhelper"
 helper = get_helper(HELPER_MODULE)
 
 
-def compile_model(which_model):
+def compile_model(which_model: str):
     """Compile the pytorch model.
 
     :param which_model: The model type to compile.
@@ -18,13 +19,13 @@ def compile_model(which_model):
     :rtype: torch.nn.Module
     """
 
-    if which_model == "CifarFedNet":
+    if which_model == ModelIdentifier.CIFAR_FEDNET.value:
         return CifarFedNet(num_classes=10)
-    elif which_model == "CifarResNet":
+    elif which_model == ModelIdentifier.CIFAR_RESNET.value:
         return CifarResNet(num_classes=10)
-    elif which_model == "CifarInception":
+    elif which_model == ModelIdentifier.CIFAR_INCEPTION.value:
         return CifarInception(num_classes=10)
-    elif which_model == "FedNet":
+    elif which_model == ModelIdentifier.FEDNET.value:
         return FedNet()
     else:
         raise ValueError(f"Unknown Model Type '{which_model}', cannot compile")

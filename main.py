@@ -15,6 +15,7 @@ from fedn.cli.run_cmd import check_yaml_exists
 from fedn.utils.dispatcher import _read_yaml_file, Dispatcher
 from fedland.loaders import DatasetIdentifier
 from fedland.database_models.experiment import Experiment
+from fedland.networks import ModelIdentifier
 
 
 # CONSTANTS
@@ -23,9 +24,9 @@ CLIENT_LEVEL = 2
 EXPERIMENTS = [
     Experiment(
         id=str(uuid.uuid4()),
-        description="EXAMPLE: Inception CIFAR-10, even classes",
+        description="EXAMPLE: ResNet CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model="CifarInception",
+        model=ModelIdentifier.CIFAR_RESNET.value,
         timestamp=datetime.now().isoformat(),
         # target_balance_ratios=[
         #     [0.01] * 10,
@@ -175,7 +176,7 @@ if __name__ == "__main__":
         8092,
         secure=False,
     )
-    manager = ClientManager()
+    # manager = ClientManager()
 
     for experiment in EXPERIMENTS:
         experiment.timestamp = datetime.now().isoformat()
@@ -188,16 +189,17 @@ if __name__ == "__main__":
             "id": sesh_id,
             "min_clients": CLIENT_LEVEL,
             "rounds": ROUNDS,
+            "round_timeout": 600,
             "aggregator": experiment.aggregator,
             "aggregator_kwargs": experiment.aggregator_kwargs,
         }
         session = api.start_session(**sesh_config)
         time.sleep(5)
 
-        manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
+        # manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
         while not session["success"]:
             print(f"=X Waiting to start run ({session['message']})")
-            manager.peak_processes()
+            # manager.peak_processes()
             time.sleep(4)
             session = api.start_session(**sesh_config)
         print(f"=>Started Federated Session:\n{session}")
@@ -206,4 +208,4 @@ if __name__ == "__main__":
             status = api.get_session_status(sesh_id)
             print(f"[*] Status: {status}")
             time.sleep(60)
-        manager.cleanup()
+        # manager.cleanup()
