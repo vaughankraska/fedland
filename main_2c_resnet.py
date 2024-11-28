@@ -21,28 +21,101 @@ from fedland.networks import ModelIdentifier
 # CONSTANTS
 ROUNDS = 30
 CLIENT_LEVEL = 2
+SUBSET_FRACTIONS = [1, 0.3]
+CLASS_IMBALANCE = [
+        [0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
+        [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.1]
+        ]
+
 EXPERIMENTS = [
-    Experiment(
+    # CIFAR-10, 2 clients, 30 rounds, Balanced classes IID fedavg
+    [Experiment( 
         id=str(uuid.uuid4()),
-        description="EXAMPLE: ResNet CIFAR-10, even classes",
+        description="ResNet CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_RESNET.value,
         timestamp=datetime.now().isoformat(),
-        target_balance_ratios=[
-            [0.1]*10,
-            [0.1]*10,
-            #[0.01, 0.02, 0.03, 0.05, 0.07, 0.10, 0.20, 0.22, 0.20, 0.10], # [0.01]*10
-            # [
-            #     float(x)
-            #     for x in (
-            #         np.exp(-0.07 * np.arange(10)) / sum(np.exp(-0.07 * np.arange(10)))
-            #     )
-            # ],
-        ],
-        subset_fractions=[1.0, 1.0], # control the amount of data each client gets
         client_stats=[],
-        aggregator="fedavg",  # OR "fedopt" / "fedavg"
-    ),
+        aggregator="fedavg",
+    )],
+    # CIFAR-10, 2 clients, 30 rounds, Balanced classes IID fedopt
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="ResNet CIFAR-10, imbalanced classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_RESNET.value,
+        timestamp=datetime.now().isoformat(),
+        client_stats=[],
+        aggregator="fedopt",
+    )],
+    # CIFAR-10, 2 clients, 30 rounds, Balanced classes Non-IID fedavg
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="ResNet CIFAR-10, even classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_RESNET.value,
+        timestamp=datetime.now().isoformat(),
+        target_balance_ratios=CLASS_IMBALANCE,
+        client_stats=[],
+        aggregator="fedavg",
+    )],
+    # CIFAR-10, 2 clients, 30 rounds, Balanced classes Non-IID fedopt
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="ResNet CIFAR-10, imbalanced classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_RESNET.value,
+        timestamp=datetime.now().isoformat(),
+        target_balance_ratios=CLASS_IMBALANCE,
+        client_stats=[],
+        aggregator="fedopt",
+    )],
+    # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes IID fedavg
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="ResNet CIFAR-10, even classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_RESNET.value,
+        timestamp=datetime.now().isoformat(),
+        subset_fractions=SUBSET_FRACTIONS,
+        client_stats=[],
+        aggregator="fedavg",
+    )],
+    # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes IID fedopt
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="ResNet CIFAR-10, even classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_RESNET.value,
+        timestamp=datetime.now().isoformat(),
+        subset_fractions=SUBSET_FRACTIONS,
+        client_stats=[],
+        aggregator="fedopt",
+    )],
+    # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes Non-IID fedavg
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="ResNet CIFAR-10, imbalanced classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_RESNET.value,
+        timestamp=datetime.now().isoformat(),
+        target_balance_ratios=CLASS_IMBALANCE,
+        subset_fractions=SUBSET_FRACTIONS,
+        client_stats=[],
+        aggregator="fedavg",
+    )],
+    # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes Non-IID fedopt
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="ResNet CIFAR-10, imbalanced classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_RESNET.value,
+        timestamp=datetime.now().isoformat(),
+        target_balance_ratios=CLASS_IMBALANCE,
+        subset_fractions=SUBSET_FRACTIONS,
+        client_stats=[],
+        aggregator="fedopt",
+    )]
 ]
 
 
@@ -181,7 +254,7 @@ if __name__ == "__main__":
     )
     # manager = ClientManager()
 
-    for experiment in EXPERIMENTS:
+    for experiment in EXPERIMENTS[7]:
         experiment.timestamp = datetime.now().isoformat()
         # Set package and seed and test in experiments.json
         setup(api, experiment)
@@ -196,9 +269,10 @@ if __name__ == "__main__":
             "aggregator": experiment.aggregator,
             "aggregator_kwargs": experiment.aggregator_kwargs,
         }
-        session = api.start_session(**sesh_config) 
-        #time.sleep(10) # Wait for session to start we can #
-        #manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
+        session = api.start_session(**sesh_config)
+        time.sleep(5)
+
+        # manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
         while not session["success"]:
             print(f"=X Waiting to start run ({session['message']})")
             # manager.peak_processes()

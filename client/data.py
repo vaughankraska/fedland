@@ -11,7 +11,7 @@ abs_path = os.path.abspath(dir_path)
 
 
 def load_data(
-    client_data_path, batch_size=64
+    client_data_path, batch_size=32
 ) -> Tuple[PartitionedDataLoader, PartitionedDataLoader]:
     """Load data from disk.
 

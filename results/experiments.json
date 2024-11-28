@@ -1,710 +1,34 @@
 [
   {
-    "id": "2bcd2475-09aa-4dbe-b50b-b3eee28ff101",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-21T13:04:03.487951",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.1342952055297946,
-        0.1252160196789796,
-        0.1167506429019022,
-        0.10885757791177986,
-        0.10149813289487379,
-        0.09463623184317296,
-        0.08823823770976097,
-        0.0822727875199731,
-        0.07671063863005816,
-        0.07152452537970473
-      ]
-    ],
-    "subset_fractions": null,
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "43c8f24b-3fe5-458a-b56c-2a8097d0c2cb",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-21T14:33:19.489876",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.1342952055297946,
-        0.1252160196789796,
-        0.1167506429019022,
-        0.10885757791177986,
-        0.10149813289487379,
-        0.09463623184317296,
-        0.08823823770976097,
-        0.0822727875199731,
-        0.07671063863005816,
-        0.07152452537970473
-      ]
-    ],
-    "subset_fractions": null,
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "49787e19-b7a7-4841-8385-868bea9a4cd4",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-21T15:50:58.405843",
-    "target_balance_ratios": [
-      [
-        0.05,
-        0.1,
-        0.15,
-        0.2,
-        0.1,
-        0.05,
-        0.05,
-        0.1,
-        0.1,
-        0.1
-      ],
-      [
-        0.05,
-        0.1,
-        0.15,
-        0.2,
-        0.1,
-        0.05,
-        0.05,
-        0.1,
-        0.1,
-        0.1
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      0.2
-    ],
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "3877f702-74d4-469a-ad1c-e37537cea920",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-21T16:51:43.473021",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedopt",
-    "aggregator_kwargs": {
-      "serveropt": "adam",
-      "learning_rate": 0.01,
-      "beta1": 0.9,
-      "beta2": 0.99,
-      "tau": 0.0001
-    }
-  },
-  {
-    "id": "f0c014fb-9644-4816-9e8b-40c672cdd004",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-21T21:21:10.809224",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.1342952055297946,
-        0.1252160196789796,
-        0.1167506429019022,
-        0.10885757791177986,
-        0.10149813289487379,
-        0.09463623184317296,
-        0.08823823770976097,
-        0.0822727875199731,
-        0.07671063863005816,
-        0.07152452537970473
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedopt",
-    "aggregator_kwargs": {
-      "serveropt": "adam",
-      "learning_rate": 0.01,
-      "beta1": 0.9,
-      "beta2": 0.99,
-      "tau": 0.0001
-    }
-  },
-  {
-    "id": "065aafb8-76b5-4495-af24-1e66aaea403f",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-22T09:04:42.140546",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "13b6fb58-aa1d-44bb-a5f2-35d28dd20cf3",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-22T10:26:00.140583",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedopt",
-    "aggregator_kwargs": {
-      "serveropt": "adam",
-      "learning_rate": 0.01,
-      "beta1": 0.9,
-      "beta2": 0.99,
-      "tau": 0.0001
-    }
-  },
-  {
-    "id": "a5af4aca-4181-4892-a228-6d5605da7a13",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-23T12:24:19.306584",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "fd230670-d380-4bf1-b8e7-e1aa39049a74",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-23T14:00:29.237825",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedopt",
-    "aggregator_kwargs": {
-      "serveropt": "adam",
-      "learning_rate": 0.01,
-      "beta1": 0.9,
-      "beta2": 0.99,
-      "tau": 0.0001
-    }
-  },
-  {
-    "id": "33eefd9e-8205-4017-9b95-194b403c2555",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-23T15:17:21.262324",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      0.3
-    ],
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "08783c16-afcb-4d98-a5d8-f19e051436b2",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-23T16:30:17.335597",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      0.3
-    ],
-    "client_stats": [],
-    "aggregator": "fedopt",
-    "aggregator_kwargs": {
-      "serveropt": "adam",
-      "learning_rate": 0.01,
-      "beta1": 0.9,
-      "beta2": 0.99,
-      "tau": 0.0001
-    }
-  },
-  {
-    "id": "cb6092f4-e077-4345-a545-bc9003ba1503",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-23T18:06:23.983873",
-    "target_balance_ratios": [
-      [
-        0.1,
-        0.2,
-        0.3,
-        0.05,
-        0.05,
-        0.02,
-        0.01,
-        0.02,
-        0.05,
-        0.2
-      ],
-      [
-        0.0,
-        0.0,
-        0.0,
-        0.1,
-        0.1,
-        0.3,
-        0.2,
-        0.1,
-        0.1,
-        0.0
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "5780b4fe-c7e6-4f31-9063-35d8760a070b",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-23T19:19:03.810907",
-    "target_balance_ratios": [
-      [
-        0.1,
-        0.2,
-        0.3,
-        0.05,
-        0.05,
-        0.02,
-        0.01,
-        0.02,
-        0.05,
-        0.2
-      ],
-      [
-        0.0,
-        0.0,
-        0.0,
-        0.1,
-        0.1,
-        0.3,
-        0.2,
-        0.1,
-        0.1,
-        0.0
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedopt",
-    "aggregator_kwargs": {
-      "serveropt": "adam",
-      "learning_rate": 0.01,
-      "beta1": 0.9,
-      "beta2": 0.99,
-      "tau": 0.0001
-    }
-  },
-  {
-    "id": "755abc1f-1a29-4053-8dcc-a750b0b3a24c",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-23T20:28:00.024041",
-    "target_balance_ratios": [
-      [
-        0.1,
-        0.2,
-        0.3,
-        0.05,
-        0.05,
-        0.02,
-        0.01,
-        0.02,
-        0.05,
-        0.2
-      ],
-      [
-        0.0,
-        0.0,
-        0.0,
-        0.1,
-        0.1,
-        0.3,
-        0.2,
-        0.1,
-        0.1,
-        0.0
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      0.3
-    ],
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "dca1dea1-8dc0-4a84-ad51-159fd651f557",
-    "description": "EXAMPLE: CIFAR-10, uneven classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarFedNet",
-    "timestamp": "2024-11-23T21:41:45.826845",
-    "target_balance_ratios": [
-      [
-        0.1,
-        0.2,
-        0.3,
-        0.05,
-        0.05,
-        0.02,
-        0.01,
-        0.02,
-        0.05,
-        0.2
-      ],
-      [
-        0.0,
-        0.0,
-        0.0,
-        0.1,
-        0.1,
-        0.3,
-        0.2,
-        0.1,
-        0.1,
-        0.0
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      0.3
-    ],
-    "client_stats": [],
-    "aggregator": "fedopt",
-    "aggregator_kwargs": {
-      "serveropt": "adam",
-      "learning_rate": 0.01,
-      "beta1": 0.9,
-      "beta2": 0.99,
-      "tau": 0.0001
-    }
-  },
-  {
-    "id": "27a47acb-5463-43b4-bb8d-a899f8dd5f16",
-    "description": "EXAMPLE: ResNet CIFAR-10, even classes",
-    "dataset_name": "CIFAR",
-    "model": "CifarResNet",
-    "timestamp": "2024-11-25T12:06:27.109655",
-    "target_balance_ratios": [
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ],
-      [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
-      ]
-    ],
-    "subset_fractions": [
-      1.0,
-      1.0
-    ],
-    "client_stats": [],
-    "aggregator": "fedavg",
-    "aggregator_kwargs": null
-  },
-  {
-    "id": "9cc5c8d4-cd05-4de4-998a-63269fea3c67",
+    "id": "31b1e29c-a099-4ce4-b8e4-46bb75b41d5e",
     "description": "EXAMPLE: ResNet CIFAR-10, even classes",
     "dataset_name": "CIFAR",
     "model": "CifarInception",
-    "timestamp": "2024-11-25T20:29:05.912978",
+    "timestamp": "2024-11-26T18:40:46.238347",
     "target_balance_ratios": [
       [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
       ],
       [
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01,
-        0.01
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
       ]
     ],
     "subset_fractions": [
@@ -714,5 +38,415 @@
     "client_stats": [],
     "aggregator": "fedavg",
     "aggregator_kwargs": null
+  },
+  {
+    "id": "f36e2c39-34cb-4b03-a2f9-68cb33bdbebe",
+    "description": "ResNet CIFAR-10, even classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-26T21:18:55.994550",
+    "target_balance_ratios": null,
+    "subset_fractions": null,
+    "client_stats": [],
+    "aggregator": "fedavg",
+    "aggregator_kwargs": null
+  },
+  {
+    "id": "8b1d3a21-7e63-40e7-be21-16d69b0b0aac",
+    "description": "ResNet CIFAR-10, imbalanced classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-26T23:15:41.376570",
+    "target_balance_ratios": null,
+    "subset_fractions": null,
+    "client_stats": [],
+    "aggregator": "fedopt",
+    "aggregator_kwargs": {
+      "serveropt": "adam",
+      "learning_rate": 0.01,
+      "beta1": 0.9,
+      "beta2": 0.99,
+      "tau": 0.0001
+    }
+  },
+  {
+    "id": "ea1b48b3-de30-4c49-9d75-aed48a676d88",
+    "description": "ResNet CIFAR-10, even classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-27T01:13:15.814383",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.0
+      ]
+    ],
+    "subset_fractions": null,
+    "client_stats": [],
+    "aggregator": "fedavg",
+    "aggregator_kwargs": null
+  },
+  {
+    "id": "becda0a1-c954-4dbf-817f-5ee340463e23",
+    "description": "ResNet CIFAR-10, imbalanced classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-27T09:30:58.454923",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.0
+      ]
+    ],
+    "subset_fractions": null,
+    "client_stats": [],
+    "aggregator": "fedopt",
+    "aggregator_kwargs": {
+      "serveropt": "adam",
+      "learning_rate": 0.01,
+      "beta1": 0.9,
+      "beta2": 0.99,
+      "tau": 0.0001
+    }
+  },
+  {
+    "id": "735bb18d-fb33-4be3-adaf-78289b69319d",
+    "description": "ResNet CIFAR-10, even classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-27T11:27:42.831082",
+    "target_balance_ratios": null,
+    "subset_fractions": [
+      1,
+      0.3
+    ],
+    "client_stats": [],
+    "aggregator": "fedavg",
+    "aggregator_kwargs": null
+  },
+  {
+    "id": "df3a0e29-0fc7-4cd5-838f-326822e098fc",
+    "description": "ResNet CIFAR-10, even classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-27T12:48:37.274119",
+    "target_balance_ratios": null,
+    "subset_fractions": [
+      1,
+      0.3
+    ],
+    "client_stats": [],
+    "aggregator": "fedopt",
+    "aggregator_kwargs": {
+      "serveropt": "adam",
+      "learning_rate": 0.01,
+      "beta1": 0.9,
+      "beta2": 0.99,
+      "tau": 0.0001
+    }
+  },
+  {
+    "id": "e7049e4f-fb78-4208-aa24-907ebf9a9ae9",
+    "description": "ResNet CIFAR-10, imbalanced classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-27T14:10:46.454304",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.0
+      ]
+    ],
+    "subset_fractions": [
+      1,
+      0.3
+    ],
+    "client_stats": [],
+    "aggregator": "fedavg",
+    "aggregator_kwargs": null
+  },
+  {
+    "id": "f494fa0f-0476-4405-8a81-10b741967777",
+    "description": "ResNet CIFAR-10, imbalanced classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-27T16:06:59.026011",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.0
+      ]
+    ],
+    "subset_fractions": [
+      1,
+      0.3
+    ],
+    "client_stats": [],
+    "aggregator": "fedopt",
+    "aggregator_kwargs": {
+      "serveropt": "adam",
+      "learning_rate": 0.01,
+      "beta1": 0.9,
+      "beta2": 0.99,
+      "tau": 0.0001
+    }
+  },
+  {
+    "id": "28ca64d7-6f5b-4944-b9f8-16b7a7010436",
+    "description": "Inception CIFAR-10, even classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarInception",
+    "timestamp": "2024-11-27T18:32:08.704758",
+    "target_balance_ratios": null,
+    "subset_fractions": null,
+    "client_stats": [],
+    "aggregator": "fedavg",
+    "aggregator_kwargs": null
+  },
+  {
+    "id": "d9ae0c7d-e2bb-4ee4-94e2-4870ae5eb80a",
+    "description": "ResNet CIFAR-10, even classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-27T20:06:39.659420",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.1
+      ]
+    ],
+    "subset_fractions": null,
+    "client_stats": [],
+    "aggregator": "fedavg",
+    "aggregator_kwargs": null
+  },
+  {
+    "id": "c986f32b-b752-45d2-ae81-9ba9b48289f7",
+    "description": "ResNet CIFAR-10, imbalanced classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-27T22:07:18.288242",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.1
+      ]
+    ],
+    "subset_fractions": null,
+    "client_stats": [],
+    "aggregator": "fedopt",
+    "aggregator_kwargs": {
+      "serveropt": "adam",
+      "learning_rate": 0.01,
+      "beta1": 0.9,
+      "beta2": 0.99,
+      "tau": 0.0001
+    }
+  },
+  {
+    "id": "01960312-13a0-4f41-9e14-31508c3c02ba",
+    "description": "ResNet CIFAR-10, imbalanced classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-28T00:03:43.566060",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.1
+      ]
+    ],
+    "subset_fractions": [
+      1,
+      0.3
+    ],
+    "client_stats": [],
+    "aggregator": "fedavg",
+    "aggregator_kwargs": null
+  },
+  {
+    "id": "b4e8e959-5146-4418-9a89-ffe9def5dcbd",
+    "description": "ResNet CIFAR-10, imbalanced classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-28T08:43:58.985098",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.1
+      ]
+    ],
+    "subset_fractions": [
+      1,
+      0.3
+    ],
+    "client_stats": [],
+    "aggregator": "fedopt",
+    "aggregator_kwargs": {
+      "serveropt": "adam",
+      "learning_rate": 0.01,
+      "beta1": 0.9,
+      "beta2": 0.99,
+      "tau": 0.0001
+    }
   }
 ]
