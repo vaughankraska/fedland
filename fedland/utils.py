@@ -1,7 +1,7 @@
 import os
 import json
 import pandas as pd
-from typing import Tuple
+from typing import Tuple, Optional
 from fedland.database_models.experiment import Experiment
 
 
@@ -55,3 +55,14 @@ def load_all_training_results(results_path: str = "results") -> pd.DataFrame:
             df_all = pd.concat([df_all, df_experiment])
 
     return df_all
+
+
+def get_experiment_description(experiment_id: str, results_path: str = "results") -> Optional[str]:
+    with open(f"{results_path}/experiments.json", mode="r") as ef:
+        experiments = json.load(ef)
+
+    for e in experiments:
+        if e["id"] == experiment_id:
+            return e["description"]
+
+    return None
