@@ -7,7 +7,7 @@ from typing import Dict, List
 from torch.utils.data import DataLoader
 from fedland.loaders import PartitionedDataLoader
 import torchvision
-from fedland.networks import CifarResNet
+from fedland.networks import CifarFedNet
 from fedland.metrics import evaluate, path_norm
 
 
@@ -121,14 +121,14 @@ if __name__ == "__main__":
     )
     test_loader = PartitionedDataLoader(test_set, num_partitions=1, partition_index=0)
 
-    model: nn.Module = CifarResNet(num_classes=10)
+    model: nn.Module = CifarFedNet(num_classes=10)
     # model: nn.Module = torchvision.models.resnet18(weights=None, num_classes=10)
     criterion = nn.CrossEntropyLoss()
-    # optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+    # optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     results = train(
         model, train_loader, test_loader, criterion, optimizer, device, epochs
     )
-    dump(results, "centalized_cifar_10_resnet", model)
+    dump(results, "centalized_cifar_10_fednet", model)
     print("<== Training Finished")
