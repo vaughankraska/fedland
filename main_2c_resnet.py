@@ -254,7 +254,7 @@ if __name__ == "__main__":
     )
     # manager = ClientManager()
 
-    for experiment in EXPERIMENTS[7]:
+    for experiment in EXPERIMENTS[1]:
         experiment.timestamp = datetime.now().isoformat()
         # Set package and seed and test in experiments.json
         setup(api, experiment)

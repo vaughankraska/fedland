@@ -448,5 +448,23 @@
       "beta2": 0.99,
       "tau": 0.0001
     }
+  },
+  {
+    "id": "5f53ca64-a84c-4d06-b2e5-0a48e47b3c77",
+    "description": "ResNet CIFAR-10, imbalanced classes",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-11-29T00:45:22.058132",
+    "target_balance_ratios": null,
+    "subset_fractions": null,
+    "client_stats": [],
+    "aggregator": "fedopt",
+    "aggregator_kwargs": {
+      "serveropt": "adam",
+      "learning_rate": 0.01,
+      "beta1": 0.9,
+      "beta2": 0.99,
+      "tau": 0.0001
+    }
   }
 ]
