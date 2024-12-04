@@ -20,8 +20,8 @@ from fedland.networks import ModelIdentifier
 
 
 # CONSTANTS
-ROUNDS = 60
-CLIENT_LEVEL = 5
+ROUNDS = 5
+CLIENT_LEVEL = 2
 SUBSET_FRACTIONS = [1, 1, 0.7, 0.5, 0.05]
 CLASS_IMBALANCE = [
         [0.1] * 10,
@@ -33,7 +33,7 @@ CLASS_IMBALANCE = [
 EXPERIMENTS = [
     Experiment(
         id=str(uuid.uuid4()),
-        description="FedNet CIFAR-10, 5 clients, IID, balanced, fedavg",
+        description="DISCARD! (testing) FedNet CIFAR-10, 5 clients, IID, balanced, fedavg",
         dataset_name=DatasetIdentifier.CIFAR.value,
         model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
@@ -41,6 +41,7 @@ EXPERIMENTS = [
         aggregator="fedavg",
     ),
 ]
+
 
 def create_cmd(name="package.tgz") -> str:
     """Copied from FEDn cli (same as `fedn package create --path client`)"""

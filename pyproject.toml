@@ -9,7 +9,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "~3.11"
-fedn = "^0.16.1"
+fedn = { git = "https://github.com/vaughankraska/fedn.git", branch = "finn_aggregator" }
 torch = "^2.4.1"
 torchvision = "^0.19.1"
 torchaudio = "^2.4.1"
