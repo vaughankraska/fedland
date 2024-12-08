@@ -87,6 +87,7 @@ target/
 
 # Jupyter labs
 ./**/.ipynb_checkpoints
+scripts/.ipynb_checkpoints
 
 # IPython
 profile_default/
