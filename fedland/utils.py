@@ -31,6 +31,8 @@ def read_experiment_data(path: str, ignore_validate = False) -> Tuple[pd.DataFra
 
                 df_training["client_index"] = client["client_index"]
                 df_training["experiment_id"] = client["experiment_id"]
+                df_training['pct_change_path_norm'] = df_training['path_norm'].pct_change()
+                df_training['pct_change_global_path_norm'] = df_training['global_path_norm'].pct_change()
 
                 df_training_results = pd.concat([df_training_results, df_training])
                 
@@ -147,7 +149,7 @@ def plot_results_overview(df, results_path: str = "results", errorbars: Optional
     plt.tight_layout()
     plt.show()
 
-def plot_results_overview_plotly(df, n_clients, result_path = './results/', metrics = ['Path-norm', 'Training Accuracy', 'Training Loss', 'Testing Accuracy', 'Testing Loss']):
+def plot_results_overview_plotly(df, n_clients, result_path = './results/', metrics = ['Path-norm', 'Path-norm Percentage Change', 'Training Accuracy', 'Training Loss', 'Testing Accuracy', 'Testing Loss']):
     """
     Create consistent visualization of federated learning experiments.
     Based on Plotly
@@ -192,14 +194,14 @@ def plot_results_overview_plotly(df, n_clients, result_path = './results/', metr
         fig.add_trace(go.Scatter(x = df_experiment[df_experiment['client_index'] == 0].index + 1,
                                  y = df_experiment[df_experiment['client_index'] == 0]['global_path_norm'],
                                  mode = 'lines',
-                                 legendgroup = 'Global Path-norm',
+                                 legendgroup = 'Global',
                                  line = dict(dash = 'dot'),
                                  line_color = colours[n_clients % len(colours)],
-                                 name = 'Global Path-norm',
+                                 name = 'Global',
                                  showlegend = True if j == 0 else False), row = row_count, col = 1)
-        # Training Accuracy
+        # Local Path-norm Percentage Change
         [[fig.add_trace(go.Scatter(x = df_experiment[df_experiment['client_index'] == i].index + 1,
-                                   y = df_experiment[df_experiment['client_index'] == i]['train_accuracy'],
+                                   y = df_experiment[df_experiment['client_index'] == i]['pct_change_path_norm'],
                                    mode = 'lines',
                                    legendgroup = 'Client ' + str(i),
                                    line_color = colours[i % len(colours)],
@@ -207,10 +209,19 @@ def plot_results_overview_plotly(df, n_clients, result_path = './results/', metr
                                    showlegend = False), row = row_count, col = 2),
           # Update x- and y-axes properties
           fig.update_xaxes(title_text = 'Iteration', row = row_count, col = 2),
-          fig.update_yaxes(title_text = 'Training Accuracy', row = row_count, col = 2)] for i in df_experiment['client_index'].unique()]
-        # Training Loss
+          fig.update_yaxes(title_text = 'Path-norm Percentage Change', row = row_count, col = 2)] for i in df_experiment['client_index'].unique()]
+        # Global Path-norm Percentage Change
+        fig.add_trace(go.Scatter(x = df_experiment[(df_experiment['client_index'] == 0) & (df_experiment['pct_change_global_path_norm'] != 0)].index + 1,
+                                 y = df_experiment[(df_experiment['client_index'] == 0) & (df_experiment['pct_change_global_path_norm'] != 0)]['pct_change_global_path_norm'],
+                                 mode = 'lines',
+                                 legendgroup = 'Global',
+                                 line = dict(dash = 'dot'),
+                                 line_color = colours[n_clients % len(colours)],
+                                 name = 'Global',
+                                 showlegend = False), row = row_count, col = 2)
+        # Training Accuracy
         [[fig.add_trace(go.Scatter(x = df_experiment[df_experiment['client_index'] == i].index + 1,
-                                   y = df_experiment[df_experiment['client_index'] == i]['train_loss'],
+                                   y = df_experiment[df_experiment['client_index'] == i]['train_accuracy'],
                                    mode = 'lines',
                                    legendgroup = 'Client ' + str(i),
                                    line_color = colours[i % len(colours)],
@@ -218,10 +229,10 @@ def plot_results_overview_plotly(df, n_clients, result_path = './results/', metr
                                    showlegend = False), row = row_count, col = 3),
           # Update x- and y-axes properties
           fig.update_xaxes(title_text = 'Iteration', row = row_count, col = 3),
-          fig.update_yaxes(title_text = 'Training Loss', row = row_count, col = 3)] for i in df_experiment['client_index'].unique()]
-        # Testing Accuracy
+          fig.update_yaxes(title_text = 'Training Accuracy', row = row_count, col = 3)] for i in df_experiment['client_index'].unique()]
+        # Training Loss
         [[fig.add_trace(go.Scatter(x = df_experiment[df_experiment['client_index'] == i].index + 1,
-                                   y = df_experiment[df_experiment['client_index'] == i]['test_accuracy'],
+                                   y = df_experiment[df_experiment['client_index'] == i]['train_loss'],
                                    mode = 'lines',
                                    legendgroup = 'Client ' + str(i),
                                    line_color = colours[i % len(colours)],
@@ -229,10 +240,10 @@ def plot_results_overview_plotly(df, n_clients, result_path = './results/', metr
                                    showlegend = False), row = row_count, col = 4),
           # Update x- and y-axes properties
           fig.update_xaxes(title_text = 'Iteration', row = row_count, col = 4),
-          fig.update_yaxes(title_text = 'Testing Accuracy', row = row_count, col = 4)] for i in df_experiment['client_index'].unique()]
-        # Testing Loss
+          fig.update_yaxes(title_text = 'Training Loss', row = row_count, col = 4)] for i in df_experiment['client_index'].unique()]
+        # Testing Accuracy
         [[fig.add_trace(go.Scatter(x = df_experiment[df_experiment['client_index'] == i].index + 1,
-                                   y = df_experiment[df_experiment['client_index'] == i]['test_loss'],
+                                   y = df_experiment[df_experiment['client_index'] == i]['test_accuracy'],
                                    mode = 'lines',
                                    legendgroup = 'Client ' + str(i),
                                    line_color = colours[i % len(colours)],
@@ -240,7 +251,18 @@ def plot_results_overview_plotly(df, n_clients, result_path = './results/', metr
                                    showlegend = False), row = row_count, col = 5),
           # Update x- and y-axes properties
           fig.update_xaxes(title_text = 'Iteration', row = row_count, col = 5),
-          fig.update_yaxes(title_text = 'Testing Loss', row = row_count, col = 5)] for i in df_experiment['client_index'].unique()]
+          fig.update_yaxes(title_text = 'Testing Accuracy', row = row_count, col = 5)] for i in df_experiment['client_index'].unique()]
+        # Testing Loss
+        [[fig.add_trace(go.Scatter(x = df_experiment[df_experiment['client_index'] == i].index + 1,
+                                   y = df_experiment[df_experiment['client_index'] == i]['test_loss'],
+                                   mode = 'lines',
+                                   legendgroup = 'Client ' + str(i),
+                                   line_color = colours[i % len(colours)],
+                                   name = 'Client ' + str(i),
+                                   showlegend = False), row = row_count, col = 6),
+          # Update x- and y-axes properties
+          fig.update_xaxes(title_text = 'Iteration', row = row_count, col = 6),
+          fig.update_yaxes(title_text = 'Testing Loss', row = row_count, col = 6)] for i in df_experiment['client_index'].unique()]
     
         row_count += 1
     
@@ -251,7 +273,7 @@ def plot_results_overview_plotly(df, n_clients, result_path = './results/', metr
     fig.update_xaxes(range = [df.index.min() - 5, df.index.max() + 5])
     
     fig.show()
-    fig.write_image(result_path + 'overivew.png', height = 900 * n_valid_experiments, width = 900 * len(metrics))
+    fig.write_image(result_path + 'overview.png', height = 900 * n_valid_experiments, width = 900 * len(metrics))
 
 def plot_results_evolution_plotly(df, result_path = './results/'):
     """
@@ -269,7 +291,7 @@ def plot_results_evolution_plotly(df, result_path = './results/'):
     
     fig = go.Figure()
     [fig.add_trace(go.Scatter(x = df_global_path_norm[df_global_path_norm['experiment_id'] == experiment_ids[i]].index + 1,
-                              y = df_global_path_norm[df_global_path_norm['experiment_id'] == experiment_ids[i]]['global_path_norm'],
+                              y = np.log10(df_global_path_norm[df_global_path_norm['experiment_id'] == experiment_ids[i]]['global_path_norm']),
                               mode = 'lines',
                               legendgroup = df_global_path_norm['description'][df_global_path_norm['experiment_id'] == experiment_ids[i]].unique()[0],
                               line_color = colours[i % len(colours)],
@@ -284,3 +306,35 @@ def plot_results_evolution_plotly(df, result_path = './results/'):
     
     fig.show()
     fig.write_image(result_path + 'evolution.png', height = 900, width = 1600)
+
+def plot_results_pct_change_plotly(df, result_path = './results/'):
+    """
+    Create consistent visualization of federated learning experiments.
+    Based on Plotly
+    """
+    # Define some useful colours
+    colours = px.colors.qualitative.Dark24[:2] + px.colors.qualitative.Dark24[6:8] + px.colors.qualitative.Dark24[14:] + [px.colors.qualitative.Dark24[5]]
+    
+    experiment_ids = df["experiment_id"].unique()
+    n_experiments = len(experiment_ids)
+    
+    df_global_path_norm = df[df['pct_change_global_path_norm'] != 0][['experiment_id', 'pct_change_global_path_norm']].drop_duplicates()
+    df_global_path_norm['description'] = [get_experiment_description(i) for i in df_global_path_norm['experiment_id']]
+    
+    fig = go.Figure()
+    [fig.add_trace(go.Scatter(x = df_global_path_norm[df_global_path_norm['experiment_id'] == experiment_ids[i]].index + 1,
+                              y = df_global_path_norm[df_global_path_norm['experiment_id'] == experiment_ids[i]]['pct_change_global_path_norm'],
+                              mode = 'lines',
+                              legendgroup = df_global_path_norm['description'][df_global_path_norm['experiment_id'] == experiment_ids[i]].unique()[0],
+                              line_color = colours[i % len(colours)],
+                              name = df_global_path_norm['description'][df_global_path_norm['experiment_id'] == experiment_ids[i]].unique()[0],
+                              showlegend = True)) for i in range(n_experiments)]
+    fig.update_layout(height = 900, width = 1600,
+                      legend = dict(orientation = 'h'),
+                      title_text = 'Path-norm Percantage Change',
+                      xaxis_title = 'Training Iteration',
+                      yaxis_title = 'Global Path-norm Percantage Change')
+    fig.update_xaxes(range = [df_global_path_norm.index.min() - 5, df_global_path_norm.index.max() + 5])
+    
+    fig.show()
+    fig.write_image(result_path + 'pct_change.png', height = 900, width = 1600)
