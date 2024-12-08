@@ -19,7 +19,7 @@ from fedland.networks import ModelIdentifier
 
 
 # CONSTANTS
-ROUNDS = 30
+ROUNDS = 60
 CLIENT_LEVEL = 2
 SUBSET_FRACTIONS = [1, 0.3]
 CLASS_IMBALANCE = [
@@ -28,88 +28,88 @@ CLASS_IMBALANCE = [
         ]
 
 EXPERIMENTS = [
-    # CIFAR-10, 2 clients, 30 rounds, Balanced classes IID fedavg
+    # CIFAR-10, 2 clients, 60 rounds, Balanced classes IID fedavg
     [Experiment( 
         id=str(uuid.uuid4()),
-        description="Inception CIFAR-10, even classes",
+        description="CIFAR_FEDNET CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         client_stats=[],
         aggregator="fedavg",
     )],
-    # CIFAR-10, 2 clients, 30 rounds, Balanced classes IID fedopt
+    # CIFAR-10, 2 clients, 60 rounds, Balanced classes IID fedopt
     [Experiment(
         id=str(uuid.uuid4()),
-        description="Inception CIFAR-10, imbalanced classes",
+        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         client_stats=[],
         aggregator="fedopt",
     )],
-    # CIFAR-10, 2 clients, 30 rounds, Balanced classes Non-IID fedavg
+    # CIFAR-10, 2 clients, 60 rounds, Balanced classes Non-IID fedavg
     [Experiment(
         id=str(uuid.uuid4()),
-        description="Inception CIFAR-10, even classes",
+        description="CIFAR_FEDNET CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=CLASS_IMBALANCE,
         client_stats=[],
         aggregator="fedavg",
     )],
-    # CIFAR-10, 2 clients, 30 rounds, Balanced classes Non-IID fedopt
+    # CIFAR-10, 2 clients, 60 rounds, Balanced classes Non-IID fedopt
     [Experiment(
         id=str(uuid.uuid4()),
-        description="Inception CIFAR-10, imbalanced classes",
+        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=CLASS_IMBALANCE,
         client_stats=[],
         aggregator="fedopt",
     )],
-    # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes IID fedavg
+    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes IID fedavg
     [Experiment(
         id=str(uuid.uuid4()),
-        description="Inception CIFAR-10, even classes",
+        description="CIFAR_FEDNET CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         subset_fractions=SUBSET_FRACTIONS,
         client_stats=[],
         aggregator="fedavg",
     )],
-    # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes IID fedopt
+    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes IID fedopt
     [Experiment(
         id=str(uuid.uuid4()),
-        description="Inception CIFAR-10, even classes",
+        description="CIFAR_FEDNET CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         subset_fractions=SUBSET_FRACTIONS,
         client_stats=[],
         aggregator="fedopt",
     )],
-    # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes Non-IID fedavg
+    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes Non-IID fedavg
     [Experiment(
         id=str(uuid.uuid4()),
-        description="Inception CIFAR-10, imbalanced classes",
+        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=CLASS_IMBALANCE,
         subset_fractions=SUBSET_FRACTIONS,
         client_stats=[],
         aggregator="fedavg",
     )],
-    # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes Non-IID fedopt
+    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes Non-IID fedopt
     [Experiment(
         id=str(uuid.uuid4()),
-        description="Inception CIFAR-10, imbalanced classes",
+        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_INCEPTION.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         target_balance_ratios=CLASS_IMBALANCE,
         subset_fractions=SUBSET_FRACTIONS,

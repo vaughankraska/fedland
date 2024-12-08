@@ -18,7 +18,7 @@ def train(
     out_model_path,
     data_path=None,
     batch_size=32,
-    epochs=3, # 5
+    epochs=5, # 5
     lr=0.01,
     momentum=0.5,
 ):
