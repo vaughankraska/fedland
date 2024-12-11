@@ -70,6 +70,11 @@ def load_all_training_results(
             df_experiment, _, _ = read_experiment_data(exp_path, ignore_validate)
             df_all = pd.concat([df_all, df_experiment])
 
+    # Create iteration variable for each experiment's clients
+    df_all = df_all.sort_values(by=["experiment_id", "client_index", "timestamp"])
+    df_all['iteration'] = df_all.groupby(['experiment_id', 'client_index']).cumcount() + 1
+    df_all = df_all.reset_index()
+
     return df_all
 
 
@@ -86,8 +91,67 @@ def get_experiment_description(
     return None
 
 
+def plot_client_info(
+        experiment_id: str,
+        results_path: str = "results",
+        figsize: tuple = (12, 10)
+        ):
+    """
+    Plots each client's data proportions and class distribution for an experiment.
+    """
+    exp_path = f"{results_path}/{experiment_id}"
+    _, _, clients_data = read_experiment_data(exp_path, ignore_validate=True)
+
+    if not clients_data:
+        raise ValueError(f"No client data found for experiment {experiment_id}")
+
+    experiment_desc = get_experiment_description(experiment_id=experiment_id, results_path=results_path)
+    class_keys = sorted(clients_data[0]['balance']['class_frequencies'].keys())
+
+    # Create a figure with two subplots
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
+    fig.suptitle(f'Client Info for "{experiment_desc}"', fontsize=12)
+
+    df_nested = pd.DataFrame(clients_data)
+    df_nested["total_data"] = df_nested["data_indices"].apply(lambda x: len(x))
+
+    class_frequencies = []
+    client_labels = []
+
+    for client in sorted(clients_data, key=lambda client: client["client_index"]):
+        class_frequencies.append([client['balance']['class_frequencies'].get(key, 0) for key in class_keys])
+        client_labels.append(client["client_index"])
+
+    # Plot total data count per client as a bar plot
+    sns.barplot(data=df_nested, x="client_index", y="total_data", ax=ax1)
+
+    ax1.set_title("Total Data Count per Client")
+    ax1.set_xlabel("Client Index")
+    ax1.set_ylabel("Total Number of Samples")
+
+    # Plot frequencies heatmap
+    sns.heatmap(class_frequencies,
+                annot=True,
+                fmt='.3f',
+                cmap='viridis',
+                xticklabels=class_keys,
+                yticklabels=[f'Client {c}' for c in client_labels],
+                vmin=0,
+                vmax=0.75,
+                ax=ax2)
+    ax2.set_title("Class Frequencies per Client")
+    ax2.set_xlabel("Classes")
+    ax2.set_ylabel("Clients")
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_results_overview(
-    df, results_path: str = "results", errorbars: Optional = ("ci", 90)
+        df,
+        results_path: str = "results",
+        errorbars: Optional = ("ci", 90),
+        epoch: Optional[int] = None,
+        pct_change: bool = False
 ):
     """
     Create consistent visualization of federated learning experiments.
@@ -101,9 +165,26 @@ def plot_results_overview(
     for i, experiment_id in enumerate(experiment_ids):
         exp_data = df[df["experiment_id"] == experiment_id]
         exp_description = get_experiment_description(experiment_id, results_path)
+        pre_title = ""
+
+        if epoch is not None:
+            exp_data = exp_data[exp_data["epoch"] == epoch]
+            pre_title = pre_title + f"Epoch=={epoch}"
+
+        if pct_change:
+            exp_data.loc[:, "path_norm"] = exp_data["path_norm"].pct_change()
+            exp_data.loc[:, "global_path_norm"] = exp_data["global_path_norm"].pct_change()
+            exp_data.loc[exp_data["global_path_norm"] == 0, "global_path_norm"] = None
+            exp_data.loc[:, "global_path_norm"] = exp_data["global_path_norm"].ffill()
+
+            exp_data = exp_data.dropna()
+            pre_title = pre_title + " %Ch."
+
         # First subplot: Path Norms
         ax1 = axs[i, 0]
-        ax1_twin = ax1.twinx()
+        path_norm_min = min(exp_data["path_norm"].min(), exp_data["global_path_norm"].min())
+        path_norm_max = max(exp_data["path_norm"].max(), exp_data["global_path_norm"].max())
+
         # Path Norm plot
         sns.lineplot(
             data=exp_data,
@@ -119,15 +200,17 @@ def plot_results_overview(
             x="iteration",
             y="global_path_norm",
             hue="client_index",
-            ax=ax1_twin,
+            ax=ax1,
             palette="viridis",
-            # label="Global",
             linestyle="--",
         )
-        ax1.set_title(f"Path Norms - {exp_description}")
+        ax1.set_title(f"{pre_title} Path Norms - {exp_description}")
+        ax1.set_ylim(path_norm_min, path_norm_max)
         ax1.set_xlabel("Training Iterations")
-        ax1.set_ylabel("Path Norm")
-        ax1_twin.set_ylabel("Global Path Norm")
+        if pct_change:
+            ax1.set_ylabel("% Change - Path Norm")
+        else:
+            ax1.set_ylabel("Path Norm")
 
         # Second subplot: Accuracies and Losses
         ax2 = axs[i, 1]
@@ -173,10 +256,6 @@ def plot_results_overview(
         )
         # Set y-axis limits
         ax2.set_ylim(0, 100)
-        # loss_max = max(exp_data["train_loss"].max(), exp_data["test_loss"].max())
-        # loss_min = max(exp_data["train_loss"].min(), exp_data["test_loss"].min())
-        # print(f"lm: {loss_min}, lax: {loss_max}")
-        # ax2_loss.set_ylim(0, loss_max)
 
         ax2.set_ylabel("Accuracy (%)", color="blue")
         ax2_loss.set_ylabel("Loss", color="green")
