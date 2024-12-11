@@ -20,102 +20,26 @@ from fedland.networks import ModelIdentifier
 
 # CONSTANTS
 ROUNDS = 60
-CLIENT_LEVEL = 2
-SUBSET_FRACTIONS = [1, 0.3]
-CLASS_IMBALANCE = [
-        [0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
-        [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.1]
-        ]
+CLIENT_LEVEL = 3
+# SUBSET_FRACTIONS = [1, 0.3]
+# CLASS_IMBALANCE = [
+#         [0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
+#         [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.1]
+#         ]
+
 
 EXPERIMENTS = [
-    # CIFAR-10, 2 clients, 60 rounds, Balanced classes IID fedavg
-    [Experiment( 
-        id=str(uuid.uuid4()),
-        description="CIFAR_FEDNET CIFAR-10, even classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_FEDNET.value,
-        timestamp=datetime.now().isoformat(),
-        client_stats=[],
-        aggregator="fedavg",
-    )],
-    # CIFAR-10, 2 clients, 60 rounds, Balanced classes IID fedopt
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_FEDNET.value,
-        timestamp=datetime.now().isoformat(),
-        client_stats=[],
-        aggregator="fedopt",
-    )],
-    # CIFAR-10, 2 clients, 60 rounds, Balanced classes Non-IID fedavg
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="CIFAR_FEDNET CIFAR-10, even classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_FEDNET.value,
-        timestamp=datetime.now().isoformat(),
-        target_balance_ratios=CLASS_IMBALANCE,
-        client_stats=[],
-        aggregator="fedavg",
-    )],
-    # CIFAR-10, 2 clients, 60 rounds, Balanced classes Non-IID fedopt
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_FEDNET.value,
-        timestamp=datetime.now().isoformat(),
-        target_balance_ratios=CLASS_IMBALANCE,
-        client_stats=[],
-        aggregator="fedopt",
-    )],
-    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes IID fedavg
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="CIFAR_FEDNET CIFAR-10, even classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_FEDNET.value,
-        timestamp=datetime.now().isoformat(),
-        subset_fractions=SUBSET_FRACTIONS,
-        client_stats=[],
-        aggregator="fedavg",
-    )],
-    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes IID fedopt
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="CIFAR_FEDNET CIFAR-10, even classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_FEDNET.value,
-        timestamp=datetime.now().isoformat(),
-        subset_fractions=SUBSET_FRACTIONS,
-        client_stats=[],
-        aggregator="fedopt",
-    )],
-    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes Non-IID fedavg
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_FEDNET.value,
-        timestamp=datetime.now().isoformat(),
-        target_balance_ratios=CLASS_IMBALANCE,
-        subset_fractions=SUBSET_FRACTIONS,
-        client_stats=[],
-        aggregator="fedavg",
-    )],
-    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes Non-IID fedopt
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_FEDNET.value,
-        timestamp=datetime.now().isoformat(),
-        target_balance_ratios=CLASS_IMBALANCE,
-        subset_fractions=SUBSET_FRACTIONS,
-        client_stats=[],
-        aggregator="fedopt",
-    )]
+[Experiment(
+    id = str(uuid.uuid4()), # Keeps happening: Could not retrieve model from combiner. Aborting training request.
+    description = 'CIFAR-10 3-Client Unbalanced Non-IID with FedNet and FedOpt Aggregator',
+    dataset_name = DatasetIdentifier.CIFAR.value,
+    model = ModelIdentifier.CIFAR_FEDNET.value,
+    timestamp = datetime.now().isoformat(),
+    target_balance_ratios = [[0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
+                            [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.0],
+                            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]],
+    subset_fractions = [1.0, 0.2, 0.1],
+    client_stats = [], aggregator = 'fedopt')]
 ]
 
 def create_cmd(name="package.tgz") -> str:
@@ -253,7 +177,7 @@ if __name__ == "__main__":
     )
     # manager = ClientManager()
 
-    for experiment in EXPERIMENTS[7]:
+    for experiment in EXPERIMENTS[0]:
         experiment.timestamp = datetime.now().isoformat()
         # Set package and seed and test in experiments.json
         setup(api, experiment)
