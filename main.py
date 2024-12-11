@@ -24,12 +24,23 @@ ROUNDS = 60
 CLIENT_LEVEL = 5
 SUBSET_FRACTIONS = [1, 1, 0.7, 0.5, 0.05]
 CLASS_IMBALANCE = [
-        [0.1] * 10,
-        [0.1] * 10,
-        [float(x) for x in (np.exp(-0.5 * np.arange(10)) / sum(np.exp(-0.5 * np.arange(10))))],
-        [float(x) for x in reversed(np.exp(-0.5 * np.arange(10)) / sum(np.exp(-0.5 * np.arange(10))))],
-        [float(x) for x in (np.exp(-0.7 * np.arange(10)) / sum(np.exp(-0.7 * np.arange(10))))]
-        ]
+    [0.1] * 10,
+    [0.1] * 10,
+    [
+        float(x)
+        for x in (np.exp(-0.5 * np.arange(10)) / sum(np.exp(-0.5 * np.arange(10))))
+    ],
+    [
+        float(x)
+        for x in reversed(
+            np.exp(-0.5 * np.arange(10)) / sum(np.exp(-0.5 * np.arange(10)))
+        )
+    ],
+    [
+        float(x)
+        for x in (np.exp(-0.7 * np.arange(10)) / sum(np.exp(-0.7 * np.arange(10))))
+    ],
+]
 EXPERIMENTS = [
     Experiment(
         id=str(uuid.uuid4()),
@@ -41,6 +52,7 @@ EXPERIMENTS = [
         aggregator="fedavg",
     ),
 ]
+
 
 def create_cmd(name="package.tgz") -> str:
     """Copied from FEDn cli (same as `fedn package create --path client`)"""
@@ -142,10 +154,8 @@ class ClientManager:
         )
         self.processes.append(process)
         threading.Thread(
-                target=self.read_output,
-                args=(process, client_number),
-                daemon=True
-                ).start()
+            target=self.read_output, args=(process, client_number), daemon=True
+        ).start()
 
     def read_output(self, process: subprocess.Popen, client_number: str):
         try:
