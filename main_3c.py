@@ -34,9 +34,7 @@ EXPERIMENTS = [
 dataset_name = DatasetIdentifier.CIFAR.value,
 model = ModelIdentifier.CIFAR_RESNET.value,
  timestamp = datetime.now().isoformat(),
- target_balance_ratios = [[0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
-[0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.0],
-[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]],
+ target_balance_ratios = [[0.1] * 10] * 3,
  subset_fractions = [],
  client_stats = [],
    aggregator = 'fedopt')]

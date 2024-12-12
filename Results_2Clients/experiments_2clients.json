@@ -1,0 +1,467 @@
+[
+    {
+        "id": "f36e2c39-34cb-4b03-a2f9-68cb33bdbebe",
+        "description": "ResNet CIFAR-10,2 clients IID balanced resnet fedavg",
+        "dataset_name": "CIFAR",
+        "model": "CifarResNet",
+        "timestamp": "2024-11-26T21:18:55.994550",
+        "target_balance_ratios": null,
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
+    },
+    {
+        "id": "8b1d3a21-7e63-40e7-be21-16d69b0b0aac",
+        "description": "ResNet CIFAR-10, 2 clients IID balanced resnet fedadam",
+        "dataset_name": "CIFAR",
+        "model": "CifarResNet",
+        "timestamp": "2024-11-26T23:15:41.376570",
+        "target_balance_ratios": null,
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedopt",
+        "aggregator_kwargs": {
+          "serveropt": "adam",
+          "learning_rate": 0.01,
+          "beta1": 0.9,
+          "beta2": 0.99,
+          "tau": 0.0001
+        }
+    },
+    {
+        "id": "735bb18d-fb33-4be3-adaf-78289b69319d",
+        "description": "ResNet CIFAR-10, 2 clients IID Imbalanced resnet fedavg",
+        "dataset_name": "CIFAR",
+        "model": "CifarResNet",
+        "timestamp": "2024-11-27T11:27:42.831082",
+        "target_balance_ratios": null,
+        "subset_fractions": [
+          1,
+          0.3
+        ],
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
+    },
+    {
+        "id": "df3a0e29-0fc7-4cd5-838f-326822e098fc",
+        "description": "ResNet CIFAR-10, 2 clients IID Imbalanced resnet fedadam",
+        "dataset_name": "CIFAR",
+        "model": "CifarResNet",
+        "timestamp": "2024-11-27T12:48:37.274119",
+        "target_balance_ratios": null,
+        "subset_fractions": [
+          1,
+          0.3
+        ],
+        "client_stats": [],
+        "aggregator": "fedopt",
+        "aggregator_kwargs": {
+          "serveropt": "adam",
+          "learning_rate": 0.01,
+          "beta1": 0.9,
+          "beta2": 0.99,
+          "tau": 0.0001
+        }
+    },
+    {
+        "id": "d9ae0c7d-e2bb-4ee4-94e2-4870ae5eb80a",
+        "description": "ResNet CIFAR-10, 2 clients non-IID Balanced resnet fedavg",
+        "dataset_name": "CIFAR",
+        "model": "CifarResNet",
+        "timestamp": "2024-11-27T20:06:39.659420",
+        "target_balance_ratios": [
+          [
+            0.1,
+            0.2,
+            0.3,
+            0.05,
+            0.05,
+            0.02,
+            0.01,
+            0.02,
+            0.05,
+            0.2
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.1,
+            0.3,
+            0.2,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
+    },
+    {
+        "id": "c986f32b-b752-45d2-ae81-9ba9b48289f7",
+        "description": "ResNet CIFAR-10, 2 clients non-IID Balanced resnet fedadam",
+        "dataset_name": "CIFAR",
+        "model": "CifarResNet",
+        "timestamp": "2024-11-27T22:07:18.288242",
+        "target_balance_ratios": [
+          [
+            0.1,
+            0.2,
+            0.3,
+            0.05,
+            0.05,
+            0.02,
+            0.01,
+            0.02,
+            0.05,
+            0.2
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.1,
+            0.3,
+            0.2,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedopt",
+        "aggregator_kwargs": {
+          "serveropt": "adam",
+          "learning_rate": 0.01,
+          "beta1": 0.9,
+          "beta2": 0.99,
+          "tau": 0.0001
+        }
+    },
+    {
+        "id": "01960312-13a0-4f41-9e14-31508c3c02ba",
+        "description": "ResNet CIFAR-10, 2 clients non-IID Imbalanced resnet fedavg",
+        "dataset_name": "CIFAR",
+        "model": "CifarResNet",
+        "timestamp": "2024-11-28T00:03:43.566060",
+        "target_balance_ratios": [
+          [
+            0.1,
+            0.2,
+            0.3,
+            0.05,
+            0.05,
+            0.02,
+            0.01,
+            0.02,
+            0.05,
+            0.2
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.1,
+            0.3,
+            0.2,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "subset_fractions": [
+          1,
+          0.3
+        ],
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
+    },
+    {
+        "id": "b4e8e959-5146-4418-9a89-ffe9def5dcbd",
+        "description": "ResNet CIFAR-10, 2 clients non-IID Imbalanced resnet fedadam",
+        "dataset_name": "CIFAR",
+        "model": "CifarResNet",
+        "timestamp": "2024-11-28T08:43:58.985098",
+        "target_balance_ratios": [
+          [
+            0.1,
+            0.2,
+            0.3,
+            0.05,
+            0.05,
+            0.02,
+            0.01,
+            0.02,
+            0.05,
+            0.2
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.1,
+            0.3,
+            0.2,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "subset_fractions": [
+          1,
+          0.3
+        ],
+        "client_stats": [],
+        "aggregator": "fedopt",
+        "aggregator_kwargs": {
+          "serveropt": "adam",
+          "learning_rate": 0.01,
+          "beta1": 0.9,
+          "beta2": 0.99,
+          "tau": 0.0001
+        }
+    },
+    {
+        "id": "2bcc3999-3677-4989-a7eb-32639b83c165",
+        "description": "CIFAR_FEDNET CIFAR-10, 2Clients IID Balanced Fedavg",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-08T12:01:16.631557",
+        "target_balance_ratios": null,
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
+    },
+    {
+        "id": "176b58e9-aace-4cbc-b7dc-8dba88af1bff",
+        "description": "CIFAR_FEDNET CIFAR-10, 2Clients IID Balanced FedAdam",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-08T13:37:31.661729",
+        "target_balance_ratios": null,
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedopt",
+        "aggregator_kwargs": {
+          "serveropt": "adam",
+          "learning_rate": 0.01,
+          "beta1": 0.9,
+          "beta2": 0.99,
+          "tau": 0.0001
+        }
+    },
+    {
+        "id": "ba41442b-e46e-41a1-870c-ff313b6a0c8c",
+        "description": "CIFAR_FEDNET CIFAR-10, 2Clients IID Imbalanced Fedavg",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-08T18:35:32.643739",
+        "target_balance_ratios": null,
+        "subset_fractions": [
+          1,
+          0.3
+        ],
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
+    },
+    {
+        "id": "3991aac2-cc3c-4405-b26f-e2896394190a",
+        "description": "CIFAR_FEDNET CIFAR-10, 2Clients IID Imbalanced FedAdam",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-09T09:05:28.796506",
+        "target_balance_ratios": null,
+        "subset_fractions": [
+          1,
+          0.3
+        ],
+        "client_stats": [],
+        "aggregator": "fedopt",
+        "aggregator_kwargs": {
+          "serveropt": "adam",
+          "learning_rate": 0.01,
+          "beta1": 0.9,
+          "beta2": 0.99,
+          "tau": 0.0001
+        }
+    },
+    {
+        "id": "db0dfea7-238a-462f-9fa5-6058fd6cbda6",
+        "description": "CIFAR_FEDNET CIFAR-10, 2Clients Non-IID Balanced Fedavg",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-08T15:13:29.557357",
+        "target_balance_ratios": [
+          [
+            0.1,
+            0.2,
+            0.3,
+            0.05,
+            0.05,
+            0.02,
+            0.01,
+            0.02,
+            0.05,
+            0.2
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.1,
+            0.3,
+            0.2,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
+    },
+    {
+        "id": "386b3021-3e83-4f5a-805b-3cdfcadb2489",
+        "description": "CIFAR_FEDNET CIFAR-10, 2Clients Non-IID Balanced FedAdam",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-08T16:48:37.923961",
+        "target_balance_ratios": [
+          [
+            0.1,
+            0.2,
+            0.3,
+            0.05,
+            0.05,
+            0.02,
+            0.01,
+            0.02,
+            0.05,
+            0.2
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.1,
+            0.3,
+            0.2,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedopt",
+        "aggregator_kwargs": {
+          "serveropt": "adam",
+          "learning_rate": 0.01,
+          "beta1": 0.9,
+          "beta2": 0.99,
+          "tau": 0.0001
+        }
+    },
+    {
+        "id": "7d546014-9e46-4ada-b86a-dc8b15b0d478",
+        "description": "CIFAR_FEDNET CIFAR-10, 2Clients Non-IID Imbalanced Fedavg",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-09T14:53:09.789787",
+        "target_balance_ratios": [
+          [
+            0.1,
+            0.2,
+            0.3,
+            0.05,
+            0.05,
+            0.02,
+            0.01,
+            0.02,
+            0.05,
+            0.2
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.1,
+            0.3,
+            0.2,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "subset_fractions": [
+          1,
+          0.3
+        ],
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
+    },
+    {
+        "id": "5230e970-1ee8-4d61-9fde-83624c02d771",
+        "description": "CIFAR_FEDNET CIFAR-10, 2Clients Non-IID Imbalanced FedAdam",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-09T20:23:14.245970",
+        "target_balance_ratios": [
+          [
+            0.1,
+            0.2,
+            0.3,
+            0.05,
+            0.05,
+            0.02,
+            0.01,
+            0.02,
+            0.05,
+            0.2
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            0.1,
+            0.3,
+            0.2,
+            0.1,
+            0.1,
+            0.1
+          ]
+        ],
+        "subset_fractions": [
+          1,
+          0.3
+        ],
+        "client_stats": [],
+        "aggregator": "fedopt",
+        "aggregator_kwargs": {
+          "serveropt": "adam",
+          "learning_rate": 0.01,
+          "beta1": 0.9,
+          "beta2": 0.99,
+          "tau": 0.0001
+        }
+    }
+
+]
