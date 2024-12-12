@@ -1099,5 +1099,60 @@
     "client_stats": [],
     "aggregator": "fedavg",
     "aggregator_kwargs": null
+  },
+  {
+    "id": "a97f0e29-0262-4eb9-a117-f08f25a3a2b1",
+    "description": "CIFAR-10 3-Client Unbalanced Non-IID with ResNet and FedOpt Aggregator",
+    "dataset_name": "CIFAR",
+    "model": "CifarResNet",
+    "timestamp": "2024-12-12T10:12:16.262596",
+    "target_balance_ratios": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "subset_fractions": [],
+    "client_stats": [],
+    "aggregator": "fedopt",
+    "aggregator_kwargs": {
+      "serveropt": "adam",
+      "learning_rate": 0.01,
+      "beta1": 0.9,
+      "beta2": 0.99,
+      "tau": 0.0001
+    }
   }
 ]

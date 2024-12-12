@@ -37,9 +37,9 @@ model = ModelIdentifier.CIFAR_RESNET.value,
  target_balance_ratios = [[0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
 [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.0],
 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]],
- subset_fractions = [1.0, 0.2, 0.1],
+ subset_fractions = [],
  client_stats = [],
-   aggregator = 'fedavg')]
+   aggregator = 'fedopt')]
 ]
 
 def create_cmd(name="package.tgz") -> str:
