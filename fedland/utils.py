@@ -151,7 +151,8 @@ def plot_results_overview(
         results_path: str = "results",
         errorbars: Optional = ("ci", 90),
         epoch: Optional[int] = None,
-        pct_change: bool = False
+        pct_change: bool = False,
+        iter_window: Optional[Tuple[int, int]] = None
 ):
     """
     Create consistent visualization of federated learning experiments.
@@ -180,6 +181,12 @@ def plot_results_overview(
             exp_data = exp_data.dropna()
             pre_title = pre_title + " %Ch."
 
+        if iter_window is not None:
+            if iter_window[0] > iter_window[1]:
+                raise ValueError("Lower bound greater than upper boud on iter_window")
+            exp_data = exp_data[exp_data["iteration"] >= iter_window[0]]
+            exp_data = exp_data[exp_data["iteration"] <= iter_window[1]]
+
         # First subplot: Path Norms
         ax1 = axs[i, 0]
         path_norm_min = min(exp_data["path_norm"].min(), exp_data["global_path_norm"].min())
@@ -207,6 +214,7 @@ def plot_results_overview(
         ax1.set_title(f"{pre_title} Path Norms - {exp_description}")
         ax1.set_ylim(path_norm_min, path_norm_max)
         ax1.set_xlabel("Training Iterations")
+
         if pct_change:
             ax1.set_ylabel("% Change - Path Norm")
         else:
@@ -254,6 +262,12 @@ def plot_results_overview(
             label="Test Loss",
             errorbar=errorbars,
         )
+
+        # Vertical lines on epoch 0 (after aggregation)
+        for epoch_val in exp_data[exp_data["epoch"] == 0]["iteration"]:
+            ax1.axvline(x=epoch_val, color="gray", linestyle="--", alpha=0.01)
+            ax2.axvline(x=epoch_val, color="gray", linestyle="--", alpha=0.01)
+
         # Set y-axis limits
         ax2.set_ylim(0, 100)
 
