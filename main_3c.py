@@ -19,7 +19,7 @@ from fedland.networks import ModelIdentifier
 
 
 # CONSTANTS
-ROUNDS = 60
+ROUNDS = 30
 CLIENT_LEVEL = 3
 # SUBSET_FRACTIONS = [1, 0.3]
 # CLASS_IMBALANCE = [
@@ -29,17 +29,17 @@ CLIENT_LEVEL = 3
 
 
 EXPERIMENTS = [
-[Experiment(
-    id = str(uuid.uuid4()), # Keeps happening: Could not retrieve model from combiner. Aborting training request.
-    description = 'CIFAR-10 3-Client Unbalanced Non-IID with FedNet and FedOpt Aggregator',
-    dataset_name = DatasetIdentifier.CIFAR.value,
-    model = ModelIdentifier.CIFAR_FEDNET.value,
-    timestamp = datetime.now().isoformat(),
-    target_balance_ratios = [[0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
-                            [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.0],
-                            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]],
-    subset_fractions = [1.0, 0.2, 0.1],
-    client_stats = [], aggregator = 'fedopt')]
+[Experiment(id = str(uuid.uuid4()),
+ description = 'CIFAR-10 3-Client Unbalanced Non-IID with ResNet and FedOpt Aggregator',
+dataset_name = DatasetIdentifier.CIFAR.value,
+model = ModelIdentifier.CIFAR_RESNET.value,
+ timestamp = datetime.now().isoformat(),
+ target_balance_ratios = [[0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
+[0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.0],
+[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]],
+ subset_fractions = [1.0, 0.2, 0.1],
+ client_stats = [],
+   aggregator = 'fedavg')]
 ]
 
 def create_cmd(name="package.tgz") -> str:
