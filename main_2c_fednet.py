@@ -1,14 +1,13 @@
 # This file is an entry point to run all the experiments
 import os
-import numpy as np
 from typing import List
 import time
 import sys
 import tarfile
 import json
 import subprocess
-import threading
 import signal
+import numpy as np
 from datetime import datetime
 import uuid
 from fedn import APIClient
@@ -21,38 +20,103 @@ from fedland.networks import ModelIdentifier
 
 # CONSTANTS
 ROUNDS = 60
-CLIENT_LEVEL = 5
-SUBSET_FRACTIONS = [1, 1, 0.7, 0.5, 0.05]
+CLIENT_LEVEL = 2
+SUBSET_FRACTIONS = [1, 0.3]
 CLASS_IMBALANCE = [
-    [0.1] * 10,
-    [0.1] * 10,
-    [
-        float(x)
-        for x in (np.exp(-0.5 * np.arange(10)) / sum(np.exp(-0.5 * np.arange(10))))
-    ],
-    [
-        float(x)
-        for x in reversed(
-            np.exp(-0.5 * np.arange(10)) / sum(np.exp(-0.5 * np.arange(10)))
-        )
-    ],
-    [
-        float(x)
-        for x in (np.exp(-0.7 * np.arange(10)) / sum(np.exp(-0.7 * np.arange(10))))
-    ],
-]
+        [0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
+        [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.1]
+        ]
+
 EXPERIMENTS = [
-    Experiment(
+    # CIFAR-10, 2 clients, 60 rounds, Balanced classes IID fedavg
+    [Experiment( 
         id=str(uuid.uuid4()),
-        description="FedNet CIFAR-10, 5 clients, IID, balanced, fedavg",
+        description="CIFAR_FEDNET CIFAR-10, even classes",
         dataset_name=DatasetIdentifier.CIFAR.value,
         model=ModelIdentifier.CIFAR_FEDNET.value,
         timestamp=datetime.now().isoformat(),
         client_stats=[],
         aggregator="fedavg",
-    ),
+    )],
+    # CIFAR-10, 2 clients, 60 rounds, Balanced classes IID fedopt
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
+        timestamp=datetime.now().isoformat(),
+        client_stats=[],
+        aggregator="fedopt",
+    )],
+    # CIFAR-10, 2 clients, 60 rounds, Balanced classes Non-IID fedavg
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="CIFAR_FEDNET CIFAR-10, even classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
+        timestamp=datetime.now().isoformat(),
+        target_balance_ratios=CLASS_IMBALANCE,
+        client_stats=[],
+        aggregator="fedavg",
+    )],
+    # CIFAR-10, 2 clients, 60 rounds, Balanced classes Non-IID fedopt
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
+        timestamp=datetime.now().isoformat(),
+        target_balance_ratios=CLASS_IMBALANCE,
+        client_stats=[],
+        aggregator="fedopt",
+    )],
+    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes IID fedavg
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="CIFAR_FEDNET CIFAR-10, even classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
+        timestamp=datetime.now().isoformat(),
+        subset_fractions=SUBSET_FRACTIONS,
+        client_stats=[],
+        aggregator="fedavg",
+    )],
+    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes IID fedopt
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="CIFAR_FEDNET CIFAR-10, even classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
+        timestamp=datetime.now().isoformat(),
+        subset_fractions=SUBSET_FRACTIONS,
+        client_stats=[],
+        aggregator="fedopt",
+    )],
+    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes Non-IID fedavg
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
+        timestamp=datetime.now().isoformat(),
+        target_balance_ratios=CLASS_IMBALANCE,
+        subset_fractions=SUBSET_FRACTIONS,
+        client_stats=[],
+        aggregator="fedavg",
+    )],
+    # CIFAR-10, 2 clients, 60 rounds, Imbalanced classes Non-IID fedopt
+    [Experiment(
+        id=str(uuid.uuid4()),
+        description="CIFAR_FEDNET CIFAR-10, imbalanced classes",
+        dataset_name=DatasetIdentifier.CIFAR.value,
+        model=ModelIdentifier.CIFAR_FEDNET.value,
+        timestamp=datetime.now().isoformat(),
+        target_balance_ratios=CLASS_IMBALANCE,
+        subset_fractions=SUBSET_FRACTIONS,
+        client_stats=[],
+        aggregator="fedopt",
+    )]
 ]
-
 
 def create_cmd(name="package.tgz") -> str:
     """Copied from FEDn cli (same as `fedn package create --path client`)"""
@@ -124,7 +188,6 @@ def setup(api: APIClient, experiment: Experiment) -> dict:
 class ClientManager:
     def __init__(self):
         self.processes: List[subprocess.Popen] = []
-        self.process_outputs: List[str] = []
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
 
@@ -149,24 +212,9 @@ class ClientManager:
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
             env=env,
         )
         self.processes.append(process)
-        threading.Thread(
-            target=self.read_output, args=(process, client_number), daemon=True
-        ).start()
-
-    def read_output(self, process: subprocess.Popen, client_number: str):
-        try:
-            for line in process.stdout:
-                print(f"C{client_number}:[*] {line.strip()}")
-            for line in process.stderr:
-                print(f"C{client_number}:[!] {line.strip()}")
-        except Exception as e:
-            print(f"Error reading output for Client {client_number}: \n {e}")
-        finally:
-            process.wait()
 
     def start_multiple_clients(self, num_clients: int, experiment_id: str):
         for i in range(num_clients):
@@ -203,9 +251,9 @@ if __name__ == "__main__":
         8092,
         secure=False,
     )
-    manager = ClientManager()
+    # manager = ClientManager()
 
-    for experiment in EXPERIMENTS:
+    for experiment in EXPERIMENTS[7]:
         experiment.timestamp = datetime.now().isoformat()
         # Set package and seed and test in experiments.json
         setup(api, experiment)
@@ -223,10 +271,10 @@ if __name__ == "__main__":
         session = api.start_session(**sesh_config)
         time.sleep(5)
 
-        manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
+        # manager.start_multiple_clients(CLIENT_LEVEL, experiment.id)
         while not session["success"]:
             print(f"=X Waiting to start run ({session['message']})")
-            manager.peak_processes()
+            # manager.peak_processes()
             time.sleep(4)
             session = api.start_session(**sesh_config)
         print(f"=>Started Federated Session:\n{session}")
@@ -235,5 +283,4 @@ if __name__ == "__main__":
             status = api.get_session_status(sesh_id)
             print(f"[*] Status: {status}")
             time.sleep(60)
-        time.sleep(30)
-        manager.cleanup()
+        # manager.cleanup()

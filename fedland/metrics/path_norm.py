@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 import copy
 from torch.nn import Module
 from torch.utils.data import DataLoader
