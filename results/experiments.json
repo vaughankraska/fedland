@@ -1541,5 +1541,42 @@
             "beta2": 0.99,
             "tau": 0.0001
         }
+    },
+    {
+        "id": "c5546b93-0450-41f3-8bf1-6535798c2d21",
+        "description": "CIFAR_FEDNET CIFAR-10, even classes",
+        "dataset_name": "CIFAR",
+        "model": "CifarFedNet",
+        "timestamp": "2024-12-23T13:54:41.961401",
+        "target_balance_ratios": [
+        [
+        0.1,
+        0.2,
+        0.3,
+        0.05,
+        0.05,
+        0.02,
+        0.01,
+        0.02,
+        0.05,
+        0.2
+        ],
+        [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.1,
+        0.3,
+        0.2,
+        0.1,
+        0.1,
+        0.1
+        ]
+        ],
+        "subset_fractions": null,
+        "client_stats": [],
+        "aggregator": "fedavg",
+        "aggregator_kwargs": null
     }
 ]
