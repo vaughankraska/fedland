@@ -1578,5 +1578,211 @@
         "client_stats": [],
         "aggregator": "fedavg",
         "aggregator_kwargs": null
+    },
+    {
+      "id": "36fd70a1-81f5-46ff-9106-c76ed10ef2bb",
+      "description": "CIFAR-10 3-Client IID Balanced with ResNet and FedAvg Aggregator",
+      "dataset_name": "CIFAR",
+      "model": "CifarResNet",
+      "timestamp": "2024-12-25T14:27:06.977425",
+      "target_balance_ratios": [
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ],
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ],
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ]
+      ],
+      "subset_fractions": [],
+      "client_stats": [],
+      "aggregator": "fedavg",
+      "aggregator_kwargs": null
+    },
+    {
+      "id": "0bd8f352-21e1-4a56-8942-85d7e30dc5de",
+      "description": "CIFAR-10 3-Client Unbalanced IID with ResNet and FedAvg Aggregator",
+      "dataset_name": "CIFAR",
+      "model": "CifarResNet",
+      "timestamp": "2024-12-25T16:25:58.219871",
+      "target_balance_ratios": [
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ],
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ],
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ]
+      ],
+      "subset_fractions": [
+        1.0,
+        0.2,
+        0.1
+      ],
+      "client_stats": [],
+      "aggregator": "fedavg",
+      "aggregator_kwargs": null
+    },
+    {
+      "id": "7134e89a-feb9-4b2a-8cdb-04c0fa7c957d",
+      "description": "CIFAR-10 3-Client Balanced Non-IID with FedNet and FedAvg Aggregator",
+      "dataset_name": "CIFAR",
+      "model": "CifarFedNet",
+      "timestamp": "2024-12-25T18:20:48.543804",
+      "target_balance_ratios": [
+        [
+          0.1,
+          0.2,
+          0.3,
+          0.05,
+          0.05,
+          0.02,
+          0.01,
+          0.02,
+          0.05,
+          0.2
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.1,
+          0.1,
+          0.3,
+          0.2,
+          0.1,
+          0.1,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "subset_fractions": null,
+      "client_stats": [],
+      "aggregator": "fedavg",
+      "aggregator_kwargs": null
+    },
+    {
+      "id": "457a1138-c96b-4493-910c-7363a047b744",
+      "description": "CIFAR-10 3-Client Balanced Non-IID with FedNet and FedAdam Aggregator",
+      "dataset_name": "CIFAR",
+      "model": "CifarFedNet",
+      "timestamp": "2024-12-25T19:41:10.590213",
+      "target_balance_ratios": [
+        [
+          0.1,
+          0.2,
+          0.3,
+          0.05,
+          0.05,
+          0.02,
+          0.01,
+          0.02,
+          0.05,
+          0.2
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.1,
+          0.1,
+          0.3,
+          0.2,
+          0.1,
+          0.1,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "subset_fractions": null,
+      "client_stats": [],
+      "aggregator": "fedopt",
+      "aggregator_kwargs": {
+        "serveropt": "adam",
+        "learning_rate": 0.01,
+        "beta1": 0.9,
+        "beta2": 0.99,
+        "tau": 0.0001
+      }
     }
 ]
