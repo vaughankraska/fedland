@@ -90,6 +90,72 @@ def get_experiment_description(
 
     return None
 
+def summarise_experiments(df):
+    '''
+    Create a dataframe that contains (experiment, client)-wise summarised statistics, including
+        Final Local Path-norm
+        Correlation Local Path-norm & Training Loss
+        Correlation Local Path-norm & Training Accuracy
+        Correlation Local Path-norm & Testing Loss
+        Correlation Local Path-norm & Testing Accuracy
+        Average Percentage Change of Local Path-norm 1 Round before Aggregation
+        Average Percentage Change of Local Path-norm on the Aggregation Round
+        Average Percentage Change of Local Path-norm 1 Round after Aggregation
+        Average Percentage Change of Local Path-norm on Non-aggregation Rounds
+    '''
+    df_summary = pd.DataFrame(columns = ['experiment_id',
+                                         'description',
+                                         'client_index',
+                                         'final_path_norm',
+                                         'corr_path_norm_train_loss',
+                                         'corr_path_norm_train_acc',
+                                         'corr_path_norm_test_loss',
+                                         'corr_path_norm_test_acc',
+                                         'avg_pct_change_path_norm_before_aggregation_rounds',
+                                         'avg_pct_change_path_norm_aggregation_rounds',
+                                         'avg_pct_change_path_norm_after_aggregation_rounds',
+                                         'avg_pct_change_path_norm_non_aggregation_rounds'])
+    
+    for experiment in df['experiment_id'].unique():
+        description = get_experiment_description(experiment)
+        df_experiment = df[df['experiment_id'] == experiment]
+        for client in df_experiment['client_index'].unique():
+            df_experiment_client = df_experiment[df_experiment['client_index'] == client].reset_index(drop = True)
+    
+            pct_change_path_norm_before_aggregation_rounds = df_experiment_client['pct_change_path_norm'][df_experiment_client['epoch'] == df_experiment_client['epoch'].max()].mean()
+            pct_change_path_norm_aggregation_rounds = df_experiment_client['pct_change_path_norm'][df_experiment_client['epoch'] == 0].mean()
+            pct_change_path_norm_after_aggregation_rounds = df_experiment_client['pct_change_path_norm'][df_experiment_client['epoch'] == 1].mean()
+            pct_change_path_norm_non_aggregation_rounds = df_experiment_client['pct_change_path_norm'][df_experiment_client['epoch'] != 0].mean()
+            
+            df_experiment_client_summary = pd.DataFrame([[experiment,
+                                                          description,
+                                                          client,
+                                                          df_experiment_client['path_norm'].iloc[-1],
+                                                          df_experiment_client['path_norm'].corr(df_experiment_client['train_loss']),
+                                                          df_experiment_client['path_norm'].corr(df_experiment_client['train_accuracy']),
+                                                          df_experiment_client['path_norm'].corr(df_experiment_client['test_loss']),
+                                                          df_experiment_client['path_norm'].corr(df_experiment_client['test_accuracy']),
+                                                          pct_change_path_norm_before_aggregation_rounds,
+                                                          pct_change_path_norm_aggregation_rounds,
+                                                          pct_change_path_norm_after_aggregation_rounds,
+                                                          pct_change_path_norm_non_aggregation_rounds]],
+                                                        columns = ['experiment_id',
+                                                                   'description',
+                                                                   'client_index',
+                                                                   'final_path_norm',
+                                                                   'corr_path_norm_train_loss',
+                                                                   'corr_path_norm_train_acc',
+                                                                   'corr_path_norm_test_loss',
+                                                                   'corr_path_norm_test_acc',
+                                                                   'avg_pct_change_path_norm_before_aggregation_rounds',
+                                                                   'avg_pct_change_path_norm_aggregation_rounds',
+                                                                   'avg_pct_change_path_norm_after_aggregation_rounds',
+                                                                   'avg_pct_change_path_norm_non_aggregation_rounds'])
+            df_summary = pd.concat([df_summary, df_experiment_client_summary], ignore_index = True)
+
+    df_summary.to_csv('./results/summary.csv')
+
+    return df_summary
 
 def plot_client_info(
         experiment_id: str,
@@ -333,7 +399,7 @@ def plot_results_overview_plotly(
     )
 
     for j in range(n_experiments):
-        df_experiment = df[df["experiment_id"] == experiment_ids[j]]
+        df_experiment = df[df["experiment_id"] == experiment_ids[j]].reset_index(drop = True)
         n_clients_experiment = len(df_experiment["client_index"].unique())
 
         if n_clients != n_clients_experiment:
@@ -347,7 +413,7 @@ def plot_results_overview_plotly(
             [
                 fig.add_trace(
                     go.Scatter(
-                        x=df_experiment[df_experiment["client_index"] == i].index + 1,
+                        x=df_experiment[df_experiment["client_index"] == i]['iteration'] + 1,
                         y=df_experiment[df_experiment["client_index"] == i][
                             "path_norm"
                         ],
@@ -369,7 +435,7 @@ def plot_results_overview_plotly(
         # Global Path-norm
         fig.add_trace(
             go.Scatter(
-                x=df_experiment[df_experiment["client_index"] == 0].index + 1,
+                x=df_experiment[df_experiment["client_index"] == 0]['iteration'] + 1,
                 y=df_experiment[df_experiment["client_index"] == 0]["global_path_norm"],
                 mode="lines",
                 legendgroup="Global",
@@ -386,7 +452,7 @@ def plot_results_overview_plotly(
             [
                 fig.add_trace(
                     go.Scatter(
-                        x=df_experiment[df_experiment["client_index"] == i].index + 1,
+                        x=df_experiment[df_experiment["client_index"] == i]['iteration'] + 1,
                         y=df_experiment[df_experiment["client_index"] == i][
                             "pct_change_path_norm"
                         ],
@@ -434,7 +500,7 @@ def plot_results_overview_plotly(
             [
                 fig.add_trace(
                     go.Scatter(
-                        x=df_experiment[df_experiment["client_index"] == i].index + 1,
+                        x=df_experiment[df_experiment["client_index"] == i]['iteration'] + 1,
                         y=df_experiment[df_experiment["client_index"] == i][
                             "train_accuracy"
                         ],
@@ -458,7 +524,7 @@ def plot_results_overview_plotly(
             [
                 fig.add_trace(
                     go.Scatter(
-                        x=df_experiment[df_experiment["client_index"] == i].index + 1,
+                        x=df_experiment[df_experiment["client_index"] == i]['iteration'] + 1,
                         y=df_experiment[df_experiment["client_index"] == i][
                             "train_loss"
                         ],
@@ -482,7 +548,7 @@ def plot_results_overview_plotly(
             [
                 fig.add_trace(
                     go.Scatter(
-                        x=df_experiment[df_experiment["client_index"] == i].index + 1,
+                        x=df_experiment[df_experiment["client_index"] == i]['iteration'] + 1,
                         y=df_experiment[df_experiment["client_index"] == i][
                             "test_accuracy"
                         ],
@@ -506,7 +572,7 @@ def plot_results_overview_plotly(
             [
                 fig.add_trace(
                     go.Scatter(
-                        x=df_experiment[df_experiment["client_index"] == i].index + 1,
+                        x=df_experiment[df_experiment["client_index"] == i]['iteration'] + 1,
                         y=df_experiment[df_experiment["client_index"] == i][
                             "test_loss"
                         ],
@@ -534,7 +600,7 @@ def plot_results_overview_plotly(
         legend=dict(orientation="h"),
         title_text=str(n_clients) + "-client Experiment Results",
     )
-    fig.update_xaxes(range=[df.index.min() - 5, df.index.max() + 5])
+    fig.update_xaxes(range=[df['iteration'].min() - 5, df['iteration'].max() + 5])
 
     fig.show()
     fig.write_image(
@@ -560,7 +626,7 @@ def plot_results_evolution_plotly(df, result_path="./results/"):
     experiment_ids = df["experiment_id"].unique()
     n_experiments = len(experiment_ids)
 
-    df_global_path_norm = df[["experiment_id", "global_path_norm"]].drop_duplicates()
+    df_global_path_norm = df[["experiment_id", "global_path_norm", "iteration"]].drop_duplicates(subset = ["experiment_id", "global_path_norm"]).reset_index(drop = True)
     df_global_path_norm["description"] = [
         get_experiment_description(i) for i in df_global_path_norm["experiment_id"]
     ]
@@ -571,7 +637,7 @@ def plot_results_evolution_plotly(df, result_path="./results/"):
             go.Scatter(
                 x=df_global_path_norm[
                     df_global_path_norm["experiment_id"] == experiment_ids[i]
-                ].index
+                ]['iteration']
                 + 1,
                 y=np.log10(
                     df_global_path_norm[
@@ -600,7 +666,7 @@ def plot_results_evolution_plotly(df, result_path="./results/"):
         yaxis_title="Log(Global Path-norm)",
     )
     fig.update_xaxes(
-        range=[df_global_path_norm.index.min() - 5, df_global_path_norm.index.max() + 5]
+        range=[df_global_path_norm['iteration'].min() - 5, df_global_path_norm['iteration'].max() + 5]
     )
 
     fig.show()
@@ -624,8 +690,8 @@ def plot_results_pct_change_plotly(df, result_path="./results/"):
     n_experiments = len(experiment_ids)
 
     df_global_path_norm = df[df["pct_change_global_path_norm"] != 0][
-        ["experiment_id", "pct_change_global_path_norm"]
-    ].drop_duplicates()
+        ["experiment_id", "pct_change_global_path_norm", "iteration"]
+    ].drop_duplicates(subset = ["experiment_id", "pct_change_global_path_norm"]).reset_index(drop = True)
     df_global_path_norm["description"] = [
         get_experiment_description(i) for i in df_global_path_norm["experiment_id"]
     ]
@@ -636,7 +702,7 @@ def plot_results_pct_change_plotly(df, result_path="./results/"):
             go.Scatter(
                 x=df_global_path_norm[
                     df_global_path_norm["experiment_id"] == experiment_ids[i]
-                ].index
+                ]['iteration']
                 + 1,
                 y=df_global_path_norm[
                     df_global_path_norm["experiment_id"] == experiment_ids[i]
@@ -663,7 +729,7 @@ def plot_results_pct_change_plotly(df, result_path="./results/"):
         yaxis_title="Global Path-norm Percantage Change",
     )
     fig.update_xaxes(
-        range=[df_global_path_norm.index.min() - 5, df_global_path_norm.index.max() + 5]
+        range=[df_global_path_norm['iteration'].min() - 5, df_global_path_norm['iteration'].max() + 5]
     )
 
     fig.show()
