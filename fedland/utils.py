@@ -90,10 +90,12 @@ def get_experiment_description(
 
     return None
 
-def summarise_experiments(df):
+def summarise_experiments(df, results_path = './results'):
     '''
     Create a dataframe that contains (experiment, client)-wise summarised statistics, including
         Final Local Path-norm
+        Final Testing Loss
+        Final Testing Accuracy
         Correlation Local Path-norm & Training Loss
         Correlation Local Path-norm & Training Accuracy
         Correlation Local Path-norm & Testing Loss
@@ -107,6 +109,8 @@ def summarise_experiments(df):
                                          'description',
                                          'client_index',
                                          'final_path_norm',
+                                         'final_test_loss',
+                                         'final_test_acc',
                                          'corr_path_norm_train_loss',
                                          'corr_path_norm_train_acc',
                                          'corr_path_norm_test_loss',
@@ -115,9 +119,17 @@ def summarise_experiments(df):
                                          'avg_pct_change_path_norm_aggregation_rounds',
                                          'avg_pct_change_path_norm_after_aggregation_rounds',
                                          'avg_pct_change_path_norm_non_aggregation_rounds'])
+    df_nested = pd.DataFrame()
     
     for experiment in df['experiment_id'].unique():
         description = get_experiment_description(experiment)
+        exp_path = f"{results_path}/{experiment}"
+        _, _, clients_data = read_experiment_data(exp_path, ignore_validate = True)
+        
+        df_nested_experiment = pd.DataFrame(clients_data)
+        df_nested_experiment["total_data"] = df_nested_experiment["data_indices"].apply(lambda x: len(x))
+        df_nested = pd.concat([df_nested, df_nested_experiment], ignore_index = True)
+            
         df_experiment = df[df['experiment_id'] == experiment]
         for client in df_experiment['client_index'].unique():
             df_experiment_client = df_experiment[df_experiment['client_index'] == client].reset_index(drop = True)
@@ -131,6 +143,8 @@ def summarise_experiments(df):
                                                           description,
                                                           client,
                                                           df_experiment_client['path_norm'].iloc[-1],
+                                                          df_experiment_client['test_loss'].iloc[-1],
+                                                          df_experiment_client['test_accuracy'].iloc[-1],
                                                           df_experiment_client['path_norm'].corr(df_experiment_client['train_loss']),
                                                           df_experiment_client['path_norm'].corr(df_experiment_client['train_accuracy']),
                                                           df_experiment_client['path_norm'].corr(df_experiment_client['test_loss']),
@@ -143,6 +157,8 @@ def summarise_experiments(df):
                                                                    'description',
                                                                    'client_index',
                                                                    'final_path_norm',
+                                                                   'final_test_loss',
+                                                                   'final_test_acc',
                                                                    'corr_path_norm_train_loss',
                                                                    'corr_path_norm_train_acc',
                                                                    'corr_path_norm_test_loss',
@@ -153,7 +169,9 @@ def summarise_experiments(df):
                                                                    'avg_pct_change_path_norm_non_aggregation_rounds'])
             df_summary = pd.concat([df_summary, df_experiment_client_summary], ignore_index = True)
 
+    df_summary = df_summary.merge(df_nested[['experiment_id', 'client_index', 'total_data']], on = ['experiment_id', 'client_index'], validate = '1:1')
     df_summary.to_csv('./results/summary.csv')
+    print('Summary saved to local file system')
 
     return df_summary
 
@@ -734,3 +752,94 @@ def plot_results_pct_change_plotly(df, result_path="./results/"):
 
     fig.show()
     fig.write_image(result_path + "pct_change.png", height=900, width=1600)
+
+def plot_final_round_plotly(df_summary, result_path="./results/"):
+    # Define some useful colours
+    colours = (
+        px.colors.qualitative.Dark24[:2]
+        + px.colors.qualitative.Dark24[6:8]
+        + px.colors.qualitative.Dark24[14:]
+        + [px.colors.qualitative.Dark24[5]]
+    )
+    
+    experiment_ids = df_summary["experiment_id"].unique()
+    n_experiments = len(experiment_ids)
+    
+    fig = make_subplots(rows=1,
+                        cols=3,
+                        subplot_titles=['Final Path-norm', 'Final Test Loss', 'Final Test Accuracy'],
+                        horizontal_spacing=0.05)
+    for i in range(n_experiments):
+        df_summary_experiment = df_summary[(df_summary['experiment_id'] == experiment_ids[i])]
+        
+        total_data = df_summary_experiment['total_data'].sum()
+        final_path_norm_min_total_data = df_summary_experiment[df_summary_experiment['total_data'] == df_summary_experiment['total_data'].min()]['final_path_norm']
+        final_test_loss_min_total_data = df_summary_experiment[df_summary_experiment['total_data'] == df_summary_experiment['total_data'].min()]['final_test_loss']
+        final_test_accuracy_min_total_data = df_summary_experiment[df_summary_experiment['total_data'] == df_summary_experiment['total_data'].min()]['final_test_acc']
+        
+        if len(final_path_norm_min_total_data) == 1:
+            final_path_norm_min_total_data = final_path_norm_min_total_data.iloc[0]
+            final_test_loss_min_total_data = final_test_loss_min_total_data.iloc[0]
+            final_test_accuracy_min_total_data = final_test_accuracy_min_total_data.iloc[0]
+    
+            fig.add_trace(
+                go.Scatter(
+                    x=df_summary_experiment['total_data'] / total_data,
+                    y=(df_summary_experiment['final_path_norm'] - final_path_norm_min_total_data) / final_path_norm_min_total_data,
+                    legendgroup=df_summary_experiment['description'].unique()[0],
+                    line_color=colours[i % len(colours)],
+                    name=df_summary_experiment["description"].unique()[0],
+                    showlegend=True,
+                ),
+                row=1,
+                col=1
+            )
+            # Update x- and y-axes properties
+            fig.update_xaxes(title_text="Proportion Number of Samples", row=1, col=1)
+            fig.update_yaxes(title_text="Percentage Difference", row=1, col=1)
+            
+            fig.add_trace(
+                go.Scatter(
+                    x=df_summary_experiment['total_data'] / total_data,
+                    y=(df_summary_experiment['final_test_loss'] - final_test_loss_min_total_data) / final_test_loss_min_total_data,
+                    legendgroup=df_summary_experiment['description'].unique()[0],
+                    line_color=colours[i % len(colours)],
+                    name=df_summary_experiment["description"].unique()[0],
+                    showlegend=False,
+                ),
+                row=1,
+                col=2
+            )
+            # Update x- and y-axes properties
+            fig.update_xaxes(title_text="Proportion Number of Samples", row=1, col=2)
+            fig.update_yaxes(title_text="Percentage Difference", row=1, col=2)
+            
+            fig.add_trace(
+                go.Scatter(
+                    x=df_summary_experiment['total_data'] / total_data,
+                    y=(df_summary_experiment['final_test_acc'] - final_test_accuracy_min_total_data) / final_test_accuracy_min_total_data,
+                    legendgroup=df_summary_experiment['description'].unique()[0],
+                    line_color=colours[i % len(colours)],
+                    name=df_summary_experiment["description"].unique()[0],
+                    showlegend=False,
+                ),
+                row=1,
+                col=3
+            )
+            # Update x- and y-axes properties
+            fig.update_xaxes(title_text="Proportion Number of Samples", row=1, col=3)
+            fig.update_yaxes(title_text="Percentage Difference", row=1, col=3)
+        else:
+            print('Experiement ' + experiment_ids[i] + ' has more than 1 clients with the least number of samples and hence is ignored.')
+        
+    fig.update_layout(
+        height=900,
+        width=2700,
+        legend=dict(orientation="h"),
+        title_text="Final Round Figures vs Number of Samples<br><sup>Relative to client with least # samples</sup>"
+    )
+    fig.update_xaxes(tickformat = '.2%')
+    fig.update_yaxes(tickformat = '.2%')
+    
+    fig.show()
+    fig.write_image(result_path + "final_round.png", height=900, width=2700)
