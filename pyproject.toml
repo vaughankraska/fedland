@@ -16,6 +16,8 @@ torchaudio = "^2.4.1"
 scipy = "^1.14.1"
 numpy = ">=2.1.2"
 python-dotenv = "^1.0.1"
+scikit-learn = "^1.6.0"
+statsmodels = "^0.14.4"
 
 [tool.poetry.group.dev]
 optional = true

@@ -33,12 +33,12 @@ def read_experiment_data(
 
                 df_training["client_index"] = client["client_index"]
                 df_training["experiment_id"] = client["experiment_id"]
-                df_training["pct_change_path_norm"] = df_training[
-                    "path_norm"
-                ].pct_change()
-                df_training["pct_change_global_path_norm"] = df_training[
-                    "global_path_norm"
-                ].pct_change()
+                df_training["pct_change_path_norm"] = df_training.groupby("client_index")["path_norm"].pct_change()
+                df_training["diff_path_norm"] = df_training.groupby("client_index")["path_norm"].diff()
+                df_training["pct_change_global_path_norm"] = df_training.groupby("client_index")["global_path_norm"].pct_change()
+                df_training["diff_global_path_norm"] = df_training.groupby("client_index")["global_path_norm"].diff()
+                df_training["gini_index"] = client["balance"]["gini_index"]
+                df_training["data_count"] = len(client["data_indices"])
 
                 df_training_results = pd.concat([df_training_results, df_training])
 
@@ -68,6 +68,9 @@ def load_all_training_results(
             print(f"WARN: Experiment id '{exp_path}' not found")
         else:
             df_experiment, _, _ = read_experiment_data(exp_path, ignore_validate)
+            df_experiment["aggregator"] = experiment.aggregator
+            df_experiment["model"] = experiment.model
+            df_experiment["client_count"] = len(df_experiment["client_index"].unique())
             df_all = pd.concat([df_all, df_experiment])
 
     # Create iteration variable for each experiment's clients
