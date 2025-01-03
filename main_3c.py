@@ -7,7 +7,6 @@ import tarfile
 import json
 import subprocess
 import signal
-import numpy as np
 from datetime import datetime
 import uuid
 from fedn import APIClient
@@ -29,16 +28,21 @@ CLIENT_LEVEL = 3
 
 
 EXPERIMENTS = [
-[Experiment(id = str(uuid.uuid4()),
- description = 'CIFAR-10 3-Client Unbalanced Non-IID with ResNet and FedOpt Aggregator',
-dataset_name = DatasetIdentifier.CIFAR.value,
-model = ModelIdentifier.CIFAR_RESNET.value,
- timestamp = datetime.now().isoformat(),
- target_balance_ratios = [[0.1] * 10] * 3,
- subset_fractions = [],
- client_stats = [],
-   aggregator = 'fedopt')]
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="CIFAR-10 3-Client Unbalanced Non-IID with ResNet and FedOpt Aggregator",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            target_balance_ratios=[[0.1] * 10] * 3,
+            subset_fractions=[],
+            client_stats=[],
+            aggregator="fedopt",
+        )
+    ]
 ]
+
 
 def create_cmd(name="package.tgz") -> str:
     """Copied from FEDn cli (same as `fedn package create --path client`)"""

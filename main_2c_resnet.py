@@ -7,7 +7,6 @@ import tarfile
 import json
 import subprocess
 import signal
-import numpy as np
 from datetime import datetime
 import uuid
 from fedn import APIClient
@@ -23,99 +22,115 @@ ROUNDS = 30
 CLIENT_LEVEL = 2
 SUBSET_FRACTIONS = [1, 0.3]
 CLASS_IMBALANCE = [
-        [0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
-        [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.1]
-        ]
+    [0.1, 0.2, 0.3, 0.05, 0.05, 0.02, 0.01, 0.02, 0.05, 0.2],
+    [0.0, 0.0, 0.0, 0.1, 0.1, 0.3, 0.2, 0.1, 0.1, 0.1],
+]
 
 EXPERIMENTS = [
     # CIFAR-10, 2 clients, 30 rounds, Balanced classes IID fedavg
-    [Experiment( 
-        id=str(uuid.uuid4()),
-        description="ResNet CIFAR-10, even classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
-        timestamp=datetime.now().isoformat(),
-        client_stats=[],
-        aggregator="fedavg",
-    )],
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="ResNet CIFAR-10, even classes",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            client_stats=[],
+            aggregator="fedavg",
+        )
+    ],
     # CIFAR-10, 2 clients, 30 rounds, Balanced classes IID fedopt
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="ResNet CIFAR-10, imbalanced classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
-        timestamp=datetime.now().isoformat(),
-        client_stats=[],
-        aggregator="fedopt",
-    )],
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="ResNet CIFAR-10, imbalanced classes",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            client_stats=[],
+            aggregator="fedopt",
+        )
+    ],
     # CIFAR-10, 2 clients, 30 rounds, Balanced classes Non-IID fedavg
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="ResNet CIFAR-10, even classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
-        timestamp=datetime.now().isoformat(),
-        target_balance_ratios=CLASS_IMBALANCE,
-        client_stats=[],
-        aggregator="fedavg",
-    )],
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="ResNet CIFAR-10, even classes",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            target_balance_ratios=CLASS_IMBALANCE,
+            client_stats=[],
+            aggregator="fedavg",
+        )
+    ],
     # CIFAR-10, 2 clients, 30 rounds, Balanced classes Non-IID fedopt
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="ResNet CIFAR-10, imbalanced classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
-        timestamp=datetime.now().isoformat(),
-        target_balance_ratios=CLASS_IMBALANCE,
-        client_stats=[],
-        aggregator="fedopt",
-    )],
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="ResNet CIFAR-10, imbalanced classes",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            target_balance_ratios=CLASS_IMBALANCE,
+            client_stats=[],
+            aggregator="fedopt",
+        )
+    ],
     # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes IID fedavg
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="ResNet CIFAR-10, even classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
-        timestamp=datetime.now().isoformat(),
-        subset_fractions=SUBSET_FRACTIONS,
-        client_stats=[],
-        aggregator="fedavg",
-    )],
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="ResNet CIFAR-10, even classes",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            subset_fractions=SUBSET_FRACTIONS,
+            client_stats=[],
+            aggregator="fedavg",
+        )
+    ],
     # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes IID fedopt
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="ResNet CIFAR-10, even classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
-        timestamp=datetime.now().isoformat(),
-        subset_fractions=SUBSET_FRACTIONS,
-        client_stats=[],
-        aggregator="fedopt",
-    )],
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="ResNet CIFAR-10, even classes",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            subset_fractions=SUBSET_FRACTIONS,
+            client_stats=[],
+            aggregator="fedopt",
+        )
+    ],
     # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes Non-IID fedavg
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="ResNet CIFAR-10, imbalanced classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
-        timestamp=datetime.now().isoformat(),
-        target_balance_ratios=CLASS_IMBALANCE,
-        subset_fractions=SUBSET_FRACTIONS,
-        client_stats=[],
-        aggregator="fedavg",
-    )],
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="ResNet CIFAR-10, imbalanced classes",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            target_balance_ratios=CLASS_IMBALANCE,
+            subset_fractions=SUBSET_FRACTIONS,
+            client_stats=[],
+            aggregator="fedavg",
+        )
+    ],
     # CIFAR-10, 2 clients, 30 rounds, Imbalanced classes Non-IID fedopt
-    [Experiment(
-        id=str(uuid.uuid4()),
-        description="ResNet CIFAR-10, imbalanced classes",
-        dataset_name=DatasetIdentifier.CIFAR.value,
-        model=ModelIdentifier.CIFAR_RESNET.value,
-        timestamp=datetime.now().isoformat(),
-        target_balance_ratios=CLASS_IMBALANCE,
-        subset_fractions=SUBSET_FRACTIONS,
-        client_stats=[],
-        aggregator="fedopt",
-    )]
+    [
+        Experiment(
+            id=str(uuid.uuid4()),
+            description="ResNet CIFAR-10, imbalanced classes",
+            dataset_name=DatasetIdentifier.CIFAR.value,
+            model=ModelIdentifier.CIFAR_RESNET.value,
+            timestamp=datetime.now().isoformat(),
+            target_balance_ratios=CLASS_IMBALANCE,
+            subset_fractions=SUBSET_FRACTIONS,
+            client_stats=[],
+            aggregator="fedopt",
+        )
+    ],
 ]
 
 

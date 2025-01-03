@@ -36,7 +36,7 @@ ids = [
     "9a0fe8d3-8506-4157-ab61-291fc6d9c38d",
     "a97f0e29-0262-4eb9-a117-f08f25a3a2b1",
     "ef47fd93-925a-42f4-be44-7b302cee44d3",
-    "7bf0af61-2674-4fec-960f-bbf6fe5c2d36"
+    "7bf0af61-2674-4fec-960f-bbf6fe5c2d36",
 ]
 
 directories = [
@@ -86,7 +86,7 @@ directories = [
     "e6c4fbe6-b338-4ddb-9994-eb3097535278",
     "ef47fd93-925a-42f4-be44-7b302cee44d3",
     "f36e2c39-34cb-4b03-a2f9-68cb33bdbebe",
-    "fdd77836-666d-4a55-90d8-022aedfda3b0"
+    "fdd77836-666d-4a55-90d8-022aedfda3b0",
 ]
 
 
